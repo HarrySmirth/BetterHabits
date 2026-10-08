@@ -9,6 +9,7 @@ import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -43,20 +44,25 @@ class RealtimeSync(
         val client = client ?: return
         if (householdId == null) return
 
-        val newChannel = client.channel("household-$householdId")
+        // Live updates are a nicety on top of sync: any failure here is logged, never fatal.
+        val newChannel = try {
+            client.channel("household-$householdId")
+        } catch (e: Exception) {
+            log("Realtime unavailable", e)
+            return
+        }
         val nudges = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
         fun changes(table: String): Flow<PostgresAction> = newChannel.postgresChangeFlow<PostgresAction>(schema = "public") {
             this.table = table
             filter("household_id", FilterOperator.EQ, householdId)
         }
-        job = scope.launch {
+        job = scope.launch(CoroutineExceptionHandler { _, e -> log("Realtime stopped", e) }) {
             merge(changes("chores"), changes("chore_occurrences"))
                 .onEach { nudges.tryEmit(Unit) }
                 .launchIn(this)
             // Several changes in quick succession (e.g. a sync from another phone) become one pull.
             nudges.debounce(DEBOUNCE_MS).onEach { onChanged(householdId) }.launchIn(this)
-            runCatching { newChannel.subscribe() }
-                .onFailure { if (BuildConfig.DEBUG) Log.w("BH", "Realtime subscribe failed", it) }
+            runCatching { newChannel.subscribe() }.onFailure { log("Realtime subscribe failed", it) }
         }
         channel = newChannel
     }
@@ -68,6 +74,10 @@ class RealtimeSync(
         channel = null
         householdId = null
         client?.let { c -> scope.launch { runCatching { c.realtime.removeChannel(old) } } }
+    }
+
+    private fun log(message: String, e: Throwable) {
+        if (BuildConfig.DEBUG) Log.w("BH", message, e)
     }
 
     private companion object {
