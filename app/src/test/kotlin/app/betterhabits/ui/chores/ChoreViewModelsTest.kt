@@ -137,6 +137,34 @@ class ChoreViewModelsTest {
     }
 
     @Test
+    fun `ticking a skipped chore completes it, and the server matches the last tap`() = runTest {
+        chore("bins", Recurrence.Once, "harry", start = today)
+        signIn("harry")
+        val vm = today()
+        val key = "bins" to OccurrenceKey(today)
+
+        vm.skip(vm.state.value.visible.single())
+        vm.toggle(vm.state.value.visible.single()) // tick a skipped item -> completed (not reset)
+        assertEquals(OccurrenceState.COMPLETED, vm.state.value.visible.single().state)
+        assertEquals(OccurrenceStatus.COMPLETED, chores.records.getValue(key).status)
+
+        vm.toggle(vm.state.value.visible.single()) // untick -> pending
+        assertEquals(OccurrenceState.UPCOMING, vm.state.value.visible.single().state)
+        assertEquals(OccurrenceStatus.PENDING, chores.records.getValue(key).status)
+        assertNull("unticking clears the completion's undo", vm.state.value.undo)
+    }
+
+    @Test
+    fun `undo on a skipped chore returns it to pending`() = runTest {
+        chore("bins", Recurrence.Once, "harry", start = today)
+        signIn("harry")
+        val vm = today()
+        vm.skip(vm.state.value.visible.single())
+        vm.reset(vm.state.value.visible.single())
+        assertEquals(OccurrenceState.UPCOMING, vm.state.value.visible.single().state)
+    }
+
+    @Test
     fun `children can only act on their own chores`() = runTest {
         chore("tidy", Recurrence.Once, "kid", start = today)
         chore("bins", Recurrence.Once, "harry", start = today)

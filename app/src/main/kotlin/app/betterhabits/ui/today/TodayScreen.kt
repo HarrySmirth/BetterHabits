@@ -210,6 +210,7 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
     val context = state.context ?: return
     val canAct = state.canAct(occurrence)
     val done = occurrence.isDone
+    val completed = occurrence.state == OccurrenceState.COMPLETED
     val assignee = context.member(occurrence.assigneeId)?.displayName ?: stringResource(R.string.chore_unassigned)
     val supporting = buildList {
         add(effortText(res, occurrence.chore.effort))
@@ -250,7 +251,8 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
         headlineContent = {
             Text(
                 occurrence.chore.name,
-                textDecoration = if (done) TextDecoration.LineThrough else null,
+                // Strikethrough only for completed, matching the ticked checkbox; skipped items are just dimmed.
+                textDecoration = if (completed) TextDecoration.LineThrough else null,
                 color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
             )
         },
@@ -282,7 +284,7 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
                     }
                 }
             } else if (canAct && occurrence.state == OccurrenceState.SKIPPED) {
-                TextButton(onClick = { viewModel.toggle(occurrence) }) { Text(stringResource(R.string.action_undo)) }
+                TextButton(onClick = { viewModel.reset(occurrence) }) { Text(stringResource(R.string.action_undo)) }
             }
         },
         modifier = Modifier.clickable(role = Role.Button, onClick = { onOpenChore(occurrence.chore.id) }),

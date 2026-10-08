@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -76,6 +78,7 @@ class TodayViewModel(
     private var choreList: List<Chore> = emptyList()
     private var records: List<OccurrenceRecord> = emptyList()
     private var selected: Pair<String, String>? = null
+    private val writes = Mutex()
 
     init {
         viewModelScope.launch {
@@ -139,12 +142,13 @@ class TodayViewModel(
 
     fun undoShown() = _state.update { it.copy(undo = null) }
 
-    /** Tick/untick: completes a pending occurrence, or reverts a done one. */
+    /**
+     * The checkbox: ticked means completed. Unticking a completed occurrence makes it pending again;
+     * ticking anything else (pending, overdue or skipped) completes it.
+     */
     fun toggle(occurrence: ChoreOccurrence) {
-        if (occurrence.isDone) {
-            apply(occurrence, occurrence.record?.copy(status = OccurrenceStatus.PENDING, completedBy = null, completedAt = null)) {
-                chores.reset(it.householdId, occurrence.chore.id, occurrence.key)
-            }
+        if (occurrence.state == OccurrenceState.COMPLETED) {
+            reset(occurrence)
         } else {
             val context = _state.value.context ?: return
             val now = clock.instant()
@@ -153,6 +157,13 @@ class TodayViewModel(
             apply(occurrence, updated, offerUndo = true, completed = true) {
                 chores.complete(it.householdId, occurrence.chore.id, occurrence.key, now)
             }
+        }
+    }
+
+    /** Back to pending, e.g. "Undo" on a skipped occurrence. */
+    fun reset(occurrence: ChoreOccurrence) {
+        apply(occurrence, occurrence.record?.copy(status = OccurrenceStatus.PENDING, completedBy = null, completedAt = null, snoozedUntil = null)) {
+            chores.reset(it.householdId, occurrence.chore.id, occurrence.key)
         }
     }
 
@@ -191,7 +202,11 @@ class TodayViewModel(
         }
     }
 
-    /** Optimistically applies [updated] locally, then persists; rolls back with a message on failure. */
+    /**
+     * Optimistically applies [updated] locally, then persists; rolls back with a message on failure.
+     * Writes go through [writes] one at a time in call order, so rapid taps reach the server in
+     * the order they were made and the final server state matches the last tap.
+     */
     private fun apply(
         occurrence: ChoreOccurrence,
         updated: OccurrenceRecord?,
@@ -203,9 +218,10 @@ class TodayViewModel(
         val before = records
         records = records.filterNot { it.choreId == occurrence.chore.id && it.key == occurrence.key } + listOfNotNull(updated)
         recompute()
-        if (offerUndo) _state.update { it.copy(undo = UndoableAction(occurrence, occurrence.record, completed)) }
+        // Any new action replaces a pending undo, so an old snackbar can't restore a stale state.
+        _state.update { it.copy(undo = if (offerUndo) UndoableAction(occurrence, occurrence.record, completed) else null) }
         viewModelScope.launch {
-            persist(context).onFailure { e ->
+            writes.withLock { persist(context) }.onFailure { e ->
                 records = before
                 recompute()
                 _state.update { it.copy(message = e.appError, undo = null) }
