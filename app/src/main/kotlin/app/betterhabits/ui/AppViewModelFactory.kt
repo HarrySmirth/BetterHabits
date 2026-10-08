@@ -12,6 +12,8 @@ import app.betterhabits.di.AppContainer
 import app.betterhabits.ui.allocation.AllocationReviewViewModel
 import app.betterhabits.ui.allocation.BalanceViewModel
 import app.betterhabits.ui.allocation.PreferencesViewModel
+import app.betterhabits.ui.templates.TemplateEditorViewModel
+import app.betterhabits.ui.templates.TemplatesViewModel
 import app.betterhabits.ui.auth.ChildSignInViewModel
 import app.betterhabits.ui.auth.ForgotPasswordViewModel
 import app.betterhabits.ui.auth.SignInViewModel
@@ -60,13 +62,15 @@ object AppViewModelFactory {
         initializer { val c = container(); TodayViewModel(c.choreRepository, c.householdRepository, c.householdSession, c.syncController, c.allocationPlanner) }
         initializer { val c = container(); ChoresViewModel(c.choreRepository, c.householdRepository, c.householdSession, c.syncController) }
         initializer { val c = container(); ChoreDetailViewModel(createSavedStateHandle(), c.choreRepository, c.householdRepository, c.householdSession) }
-        initializer { val c = container(); ChoreEditorViewModel(createSavedStateHandle(), c.choreRepository, c.householdRepository, c.householdSession, c.allocationPlanner) }
+        initializer { val c = container(); ChoreEditorViewModel(createSavedStateHandle(), c.choreRepository, c.householdRepository, c.householdSession, c.allocationPlanner, c.templateRepository) }
         initializer { val c = container(); HistoryViewModel(c.choreRepository, c.householdRepository, c.householdSession) }
 
         initializer {
             val c = container()
-            PreferencesViewModel(createSavedStateHandle(), c.allocationRepository, c.choreRepository, c.householdRepository, c.householdSession)
+            PreferencesViewModel(createSavedStateHandle(), c.allocationRepository, c.choreRepository, c.householdRepository, c.householdSession, c.templateRepository)
         }
+        initializer { val c = container(); TemplatesViewModel(c.templateRepository, c.allocationRepository, c.householdRepository, c.householdSession) }
+        initializer { val c = container(); TemplateEditorViewModel(createSavedStateHandle(), c.templateRepository, c.choreRepository, c.householdRepository, c.householdSession) }
         initializer { val c = container(); BalanceViewModel(c.allocationPlanner, c.householdRepository, c.householdSession) }
         initializer { val c = container(); AllocationReviewViewModel(c.allocationPlanner, c.householdRepository, c.householdSession) }
     }

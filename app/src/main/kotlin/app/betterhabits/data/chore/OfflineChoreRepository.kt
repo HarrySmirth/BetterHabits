@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -118,6 +120,11 @@ class OfflineChoreRepository(
             put("status", OccurrenceStatus.PENDING.name)
             put("snoozed_until", until.toString())
         }) { base(it, householdId, choreId, key).cleared(OccurrenceStatus.PENDING).copy(snoozedUntilMillis = until.toEpochMilli()) }
+
+    override suspend fun setCheckedSteps(householdId: String, choreId: String, key: OccurrenceKey, steps: Set<Int>) =
+        updateOccurrence(householdId, choreId, key, buildJsonObject {
+            putJsonArray("checked_steps") { steps.sorted().forEach { add(it) } }
+        }) { base(it, householdId, choreId, key).copy(checkedSteps = ChoreMapping.encodeSteps(steps)) }
 
     override suspend fun reassignOccurrence(householdId: String, choreId: String, key: OccurrenceKey, assigneeId: String?) =
         updateOccurrence(householdId, choreId, key, buildJsonObject {

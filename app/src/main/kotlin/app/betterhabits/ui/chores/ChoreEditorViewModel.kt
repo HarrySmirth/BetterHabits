@@ -7,6 +7,7 @@ import app.betterhabits.data.allocation.AllocationPlanner
 import app.betterhabits.data.chore.ChoreRepository
 import app.betterhabits.data.household.HouseholdRepository
 import app.betterhabits.data.household.HouseholdSession
+import app.betterhabits.data.template.TemplateRepository
 import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.appError
 import app.betterhabits.domain.allocation.AllocationProposal
@@ -54,6 +55,7 @@ data class ChoreForm(
     val assignmentLocked: Boolean = false,
     val rotate: Boolean = false,
     val excludedMemberIds: Set<String> = emptySet(),
+    val templateId: String? = null,
 ) {
     val nameValid get() = name.isNotBlank() && name.trim().length <= Chore.MAX_NAME_LENGTH
     val minutesValid get() = minutes != null && minutes in 1..Chore.MAX_MINUTES
@@ -105,6 +107,7 @@ data class ChoreForm(
                 assignmentLocked = chore.assignmentLocked,
                 rotate = chore.rotate,
                 excludedMemberIds = chore.excludedMemberIds,
+                templateId = chore.templateId,
             )
         }
     }
@@ -124,6 +127,8 @@ data class ChoreEditorUiState(
     /** Why the suggested assignee was picked (shown under the people chips). */
     val suggestion: AllocationProposal? = null,
     val suggesting: Boolean = false,
+    /** Name of the template a new chore was started from. */
+    val templateName: String? = null,
 ) {
     val isNew get() = existing == null
     val canEdit get() = context?.details?.iCan(if (isNew) HouseholdPermission.CREATE_CHORES else HouseholdPermission.EDIT_CHORES) == true
@@ -138,11 +143,13 @@ class ChoreEditorViewModel(
     private val households: HouseholdRepository,
     private val session: HouseholdSession,
     private val planner: AllocationPlanner,
+    private val templates: TemplateRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
 
-    /** Route arg (see ChoreEditorRoute); null when creating. */
+    /** Route args (see ChoreEditorRoute); choreId null when creating, optionally from a template. */
     private val choreId: String? = savedStateHandle.get<String>("choreId")
+    private val templateId: String? = savedStateHandle.get<String>("templateId")
 
     /** Id for a new chore, stable across "Suggest" and "Save". */
     private val newChoreId = UUID.randomUUID().toString()
@@ -163,11 +170,17 @@ class ChoreEditorViewModel(
             }
             val today = clock.instant().atZone(context.zone).toLocalDate()
             if (choreId == null) {
+                val template = templateId?.let { id -> templates.templates(householdId).getOrNull()?.firstOrNull { it.id == id } }
+                val form = template?.let { ChoreForm.from(it.toChore(newChoreId, householdId, today, context.zone)) }
+                    ?: ChoreForm(startDate = today, weekdays = setOf(today.dayOfWeek), assigneeId = null)
                 _state.update {
                     it.copy(
                         loading = false,
                         context = context,
-                        form = ChoreForm(startDate = today, weekdays = setOf(today.dayOfWeek), assigneeId = null),
+                        form = form,
+                        templateName = template?.name,
+                        // Steps live under "More options": open it so a template's steps are visible.
+                        showAdvanced = template?.checklist?.isNotEmpty() == true,
                     )
                 }
             } else {
@@ -257,6 +270,7 @@ class ChoreEditorViewModel(
             rotate = form.rotate,
             excludedMemberIds = form.excludedMemberIds,
             checklist = form.checklist,
+            templateId = form.templateId,
             notes = form.notes.trim().ifEmpty { null },
             requiresProof = s.existing?.requiresProof ?: false,
             active = s.existing?.active ?: true,

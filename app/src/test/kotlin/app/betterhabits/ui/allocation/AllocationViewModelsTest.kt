@@ -20,6 +20,7 @@ import app.betterhabits.testing.FakeChoreRepository
 import app.betterhabits.testing.FakeHouseholdRepository
 import app.betterhabits.testing.FakeProfileRepository
 import app.betterhabits.testing.FakeSyncController
+import app.betterhabits.testing.FakeTemplateRepository
 import app.betterhabits.testing.FakeUserPreferencesRepository
 import app.betterhabits.testing.MainDispatcherRule
 import app.betterhabits.ui.chores.ChoreEditorViewModel
@@ -69,7 +70,7 @@ class AllocationViewModelsTest {
     @Test
     fun `editor suggestion picks the person with less work and explains it`() = runTest {
         chore("big", 90, "harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, FakeTemplateRepository(), clock)
         vm.onName("Bins")
         vm.onMinutes(10)
         vm.onToggleExcluded("kid")
@@ -86,7 +87,7 @@ class AllocationViewModelsTest {
 
     @Test
     fun `choosing someone by hand replaces the suggestion`() = runTest {
-        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, FakeTemplateRepository(), clock)
         vm.onName("Bins")
         vm.suggestAssignee()
         vm.onAssignee("harry")
@@ -130,7 +131,7 @@ class AllocationViewModelsTest {
     @Test
     fun `preferences save at once and roll back if the server refuses`() = runTest {
         chore("bathroom", 40, null, ChoreCategory.BATHROOM)
-        val vm = PreferencesViewModel(SavedStateHandle(), allocation, chores, households, session)
+        val vm = PreferencesViewModel(SavedStateHandle(), allocation, chores, households, session, FakeTemplateRepository())
         assertTrue(vm.state.value.canEdit)
 
         vm.setChorePreference("bathroom", PreferenceLevel.HATE)
@@ -144,8 +145,8 @@ class AllocationViewModelsTest {
 
     @Test
     fun `parents can edit a child's preferences but not another adult's`() = runTest {
-        assertTrue(PreferencesViewModel(SavedStateHandle(mapOf("memberId" to "kid")), allocation, chores, households, session).state.value.canEdit)
-        assertFalse(PreferencesViewModel(SavedStateHandle(mapOf("memberId" to "sarah")), allocation, chores, households, session).state.value.canEdit)
+        assertTrue(PreferencesViewModel(SavedStateHandle(mapOf("memberId" to "kid")), allocation, chores, households, session, FakeTemplateRepository()).state.value.canEdit)
+        assertFalse(PreferencesViewModel(SavedStateHandle(mapOf("memberId" to "sarah")), allocation, chores, households, session, FakeTemplateRepository()).state.value.canEdit)
     }
 
     @Test

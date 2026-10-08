@@ -70,6 +70,21 @@ class OfflineChoreRepositoryTest {
     }
 
     @Test
+    fun checkedStepsAreStoredAndQueuedWithoutTouchingStatus() = runTest {
+        repo.createChore(chore().copy(checklist = listOf("Wash", "Dry", "Put away")))
+        val key = OccurrenceKey(day, null)
+        repo.complete("h1", "c1", key, Instant.parse("2026-10-08T09:00:00Z"))
+        repo.setCheckedSteps("h1", "c1", key, setOf(2, 0))
+
+        val record = repo.observeRecords("h1", day, day).first().single()
+        assertEquals(setOf(0, 2), record.checkedSteps)
+        assertEquals(OccurrenceStatus.COMPLETED, record.status)
+        val op = store.pendingOps("h1").last().op as PendingOp.UpsertOccurrence
+        assertEquals("[0,2]", op.row.getValue("checked_steps").toString())
+        assertFalse(op.row.containsKey("status"))
+    }
+
+    @Test
     fun editsQueueOnlyTheChangedFields() = runTest {
         val original = chore()
         repo.createChore(original)

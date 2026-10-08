@@ -23,6 +23,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -116,6 +118,27 @@ fun PreferencesScreen(onBack: () -> Unit, viewModel: PreferencesViewModel = view
                         onSelect = { viewModel.setCategoryPreference(category, it) },
                     )
                 }
+                if (state.preferences.byTemplate.isNotEmpty()) {
+                    item(key = "templates-header") {
+                        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                        SectionHeader(stringResource(R.string.prefs_templates))
+                        Text(
+                            stringResource(R.string.prefs_templates_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
+                    items(state.preferences.byTemplate.keys.sortedBy { state.templateNames[it].orEmpty().lowercase() }, key = { "template-$it" }) { id ->
+                        PreferenceRow(
+                            title = state.templateNames[id] ?: id.substringAfterLast('.'),
+                            current = state.preferences.byTemplate[id],
+                            fallbackLabel = stringResource(R.string.template_pref_none),
+                            enabled = state.canEdit,
+                            onSelect = { viewModel.setTemplatePreference(id, it) },
+                        )
+                    }
+                }
                 state.choresByCategory.forEach { (category, chores) ->
                     item(key = "header-$category") {
                         HorizontalDivider(Modifier.padding(vertical = 8.dp))
@@ -202,11 +225,12 @@ private fun AvailabilitySection(state: PreferencesUiState, vm: PreferencesViewMo
 
 /** A row with a dropdown of preference levels. [current] null = not set (shows [fallbackLabel]). */
 @Composable
-private fun PreferenceRow(title: String, current: PreferenceLevel?, fallbackLabel: String, enabled: Boolean, onSelect: (PreferenceLevel?) -> Unit) {
+internal fun PreferenceRow(title: String, current: PreferenceLevel?, fallbackLabel: String, enabled: Boolean, onSelect: (PreferenceLevel?) -> Unit) {
     var open by remember { mutableStateOf(false) }
     val currentLabel = current?.let { stringResource(it.labelRes()) } ?: fallbackLabel
     ListItem(
         headlineContent = { Text(title) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         trailingContent = {
             Box {
                 TextButton(onClick = { open = true }, enabled = enabled) {

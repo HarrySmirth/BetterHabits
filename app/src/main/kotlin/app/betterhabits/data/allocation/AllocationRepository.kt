@@ -30,6 +30,9 @@ import java.time.LocalDate
 sealed interface PreferenceTarget {
     data class ChoreTarget(val choreId: String) : PreferenceTarget
     data class CategoryTarget(val category: ChoreCategory) : PreferenceTarget
+
+    /** A household/personal template id or built-in key; applies to chores made from it. */
+    data class TemplateTarget(val templateId: String) : PreferenceTarget
 }
 
 data class AwayPeriod(val id: String, val memberId: String, val range: DateRange, val note: String?)
@@ -142,6 +145,7 @@ class SupabaseAllocationRepository(
                     val category = ChoreCategory.entries.firstOrNull { it.name == r.target } ?: return@mapNotNull null
                     r.level.toLevel()?.let { category to it }
                 }.toMap(),
+                byTemplate = rows.filter { it.targetType == "TEMPLATE" }.mapNotNull { r -> r.level.toLevel()?.let { r.target to it } }.toMap(),
             )
         }
         val awayPeriods = away.mapNotNull { dto ->
@@ -170,6 +174,7 @@ class SupabaseAllocationRepository(
         val (type, value) = when (target) {
             is PreferenceTarget.ChoreTarget -> "CHORE" to target.choreId
             is PreferenceTarget.CategoryTarget -> "CATEGORY" to target.category.name
+            is PreferenceTarget.TemplateTarget -> "TEMPLATE" to target.templateId
         }
         val table = db().from("member_preferences")
         if (level == null) {

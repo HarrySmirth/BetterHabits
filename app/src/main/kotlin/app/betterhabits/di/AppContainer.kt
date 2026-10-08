@@ -5,6 +5,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import app.betterhabits.BuildConfig
 import app.betterhabits.data.allocation.AllocationPlanner
+import app.betterhabits.data.template.BuiltInTemplates
+import app.betterhabits.data.template.SupabaseTemplateRepository
+import app.betterhabits.data.template.TemplateRepository
 import app.betterhabits.data.allocation.AllocationRepository
 import app.betterhabits.data.allocation.SupabaseAllocationRepository
 import app.betterhabits.data.auth.AuthRepository
@@ -62,6 +65,7 @@ interface AppContainer {
 
     val allocationRepository: AllocationRepository
     val allocationPlanner: AllocationPlanner
+    val templateRepository: TemplateRepository
 
     /** Background worker entry point; null where there is no real sync (tests). */
     val syncEngine: SyncEngine?
@@ -127,6 +131,10 @@ class DefaultAppContainer(context: Context) : AppContainer {
     override val allocationRepository: AllocationRepository by lazy { SupabaseAllocationRepository(supabase, database.cacheDao()) }
 
     override val allocationPlanner: AllocationPlanner by lazy { AllocationPlanner(choreRepository, allocationRepository) }
+    override val templateRepository: TemplateRepository by lazy {
+        val builtIn by lazy { BuiltInTemplates.parse(appContext.assets.open("templates/builtin.json").bufferedReader().use { it.readText() }) }
+        SupabaseTemplateRepository(supabase, database.cacheDao()) { builtIn }
+    }
 
     private val realtime by lazy {
         RealtimeSync(supabase, applicationScope) { householdId -> syncEngine.sync(householdId) }

@@ -85,7 +85,7 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.TextStyle
 
-private val MINUTE_PRESETS = listOf(5, 10, 15, 20, 30, 45, 60, 90)
+internal val MINUTE_PRESETS = listOf(5, 10, 15, 20, 30, 45, 60, 90)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,6 +149,13 @@ private fun EditorForm(state: ChoreEditorUiState, vm: ChoreEditorViewModel) {
                     .focusRequester(focus)
                     .testTag("choreName"),
             )
+            state.templateName?.let { name ->
+                Text(
+                    stringResource(R.string.editor_from_template, name),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
         Question(R.string.editor_q_how_often) { RepeatSection(state, vm) }

@@ -50,6 +50,8 @@ class FakeAllocationRepository : AllocationRepository {
                 current.copy(byChore = if (level == null) current.byChore - target.choreId else current.byChore + (target.choreId to level))
             is PreferenceTarget.CategoryTarget ->
                 current.copy(byCategory = if (level == null) current.byCategory - target.category else current.byCategory + (target.category to level))
+            is PreferenceTarget.TemplateTarget ->
+                current.copy(byTemplate = if (level == null) current.byTemplate - target.templateId else current.byTemplate + (target.templateId to level))
         }
     }
 

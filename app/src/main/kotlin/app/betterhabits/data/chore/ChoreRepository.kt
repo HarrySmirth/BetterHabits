@@ -46,6 +46,9 @@ interface ChoreRepository {
 
     suspend fun snooze(householdId: String, choreId: String, key: OccurrenceKey, until: Instant): Result<Unit>
 
+    /** Records which checklist steps are ticked for one occurrence (leaves its status alone). */
+    suspend fun setCheckedSteps(householdId: String, choreId: String, key: OccurrenceKey, steps: Set<Int>): Result<Unit>
+
     /** Overrides the assignee for one occurrence; null = back to the chore's default. */
     suspend fun reassignOccurrence(householdId: String, choreId: String, key: OccurrenceKey, assigneeId: String?): Result<Unit>
 }

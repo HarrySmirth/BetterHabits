@@ -16,7 +16,7 @@ Most chore apps ask *"who is assigned this?"*. BetterHabits aims to answer *"giv
 - Optional gamification (points, badges, rewards)
 
 ## Status
-**Early development.** Accounts, households, roles and permissions, invite codes, email invitations and child accounts work (Phase 1). So do chores, with recurring schedules, completion, skipping, snoozing, undo and history (Phase 2). The app works offline and syncs live between phones (Phase 3). Chores can be shared out fairly by estimated effort, with preferences, availability and explanations (Phase 4).
+**Early development.** Accounts, households, roles and permissions, invite codes, email invitations and child accounts work (Phase 1). So do chores, with recurring schedules, completion, skipping, snoozing, undo and history (Phase 2). The app works offline and syncs live between phones (Phase 3). Chores can be shared out fairly by estimated effort, with preferences, availability and explanations (Phase 4). Templates (built-in, household and personal) and multi-step chores work too (Phase 5).
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -25,8 +25,8 @@ Most chore apps ask *"who is assigned this?"*. BetterHabits aims to answer *"giv
 | 2 | Chores, recurrence, completion, history | ✅ |
 | 3 | Offline cache, sync, realtime | ✅ |
 | 4 | Preferences, fairness, smart allocation | ✅ |
-| 5 | Templates | ⏳ |
-| 6 | Habits and streaks | |
+| 5 | Templates | ✅ |
+| 6 | Habits and streaks | ⏳ |
 | 7 | Notifications and calendar | |
 | 8 | Gamification | |
 | 9 | Analytics and polish | |

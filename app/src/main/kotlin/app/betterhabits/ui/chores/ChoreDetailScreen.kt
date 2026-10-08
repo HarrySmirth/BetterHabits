@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,7 @@ import java.time.ZoneId
 fun ChoreDetailScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
+    onSaveAsTemplate: (String) -> Unit,
     viewModel: ChoreDetailViewModel = viewModel(factory = AppViewModelFactory.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -70,6 +72,11 @@ fun ChoreDetailScreen(
                 },
                 actions = {
                     val chore = state.chore
+                    if (chore != null) {
+                        IconButton(onClick = { onSaveAsTemplate(chore.id) }) {
+                            Icon(Icons.Outlined.BookmarkAdd, contentDescription = stringResource(R.string.action_save_as_template))
+                        }
+                    }
                     if (chore != null && state.canEdit) {
                         IconButton(onClick = { onEdit(chore.id) }) {
                             Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.action_edit))

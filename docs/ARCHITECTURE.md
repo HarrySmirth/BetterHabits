@@ -35,6 +35,10 @@ This is a deterministic scoring model in `:domain`, not a black box. Workload (e
 
 The winner must sit within a fairness band (the larger of 20 minutes and 15% of the average load), so preferences never outweigh fairness. `data/allocation/AllocationPlanner` gathers the inputs from local data and runs the engine, so suggestions work offline. Proposals are only ever applied after a person reviews them, except for "take turns" chores, which move to the next person on completion.
 
+## Templates (Phase 5)
+
+`domain/model/ChoreTemplate` turns a template into a chore (`toChore`) and a chore into a template (`ChoreTemplate.fromChore`). `data/template/TemplateRepository` merges the bundled built-in library with household and personal templates from Supabase. It caches them for offline reading, but editing them needs a connection. A chore created from a template works offline, like any other chore.
+
 ## Key decisions log
 
 | Decision | Why |

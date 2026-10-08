@@ -1,6 +1,14 @@
 package app.betterhabits.ui.today
 
 import androidx.compose.foundation.clickable
+import app.betterhabits.ui.components.LilyPadCheckbox
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -8,7 +16,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.Alignment
@@ -31,7 +38,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -191,7 +197,7 @@ private fun LazyListScope.section(
     if (items.isEmpty()) return
     item(key = "header-$title") { SectionHeader(stringResource(title)) }
     items(items, key = { "${it.chore.id}-${it.key}" }) { occurrence ->
-        OccurrenceRow(occurrence, state, viewModel, onOpenChore)
+        Column { OccurrenceRow(occurrence, state, viewModel, onOpenChore) }
     }
 }
 
@@ -233,8 +239,8 @@ private fun ProgressCard(state: TodayUiState) {
                     )
                 }
             }
-            AnimatedVisibility(visible = allDone, enter = scaleIn() + fadeIn(), exit = fadeOut()) {
-                Frog(FrogMood.CELEBRATE, Modifier.padding(start = 8.dp), width = 88.dp)
+            Crossfade(targetState = allDone, label = "pip") { done ->
+                Frog(if (done) FrogMood.CELEBRATE else FrogMood.HAPPY, Modifier.padding(start = 8.dp), width = 88.dp)
             }
         }
     }
@@ -249,8 +255,10 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
     val done = occurrence.isDone
     val completed = occurrence.state == OccurrenceState.COMPLETED
     val assignee = context.member(occurrence.assigneeId)?.displayName ?: stringResource(R.string.chore_unassigned)
+    val steps = occurrence.chore.checklist
     val supporting = buildList {
         add(effortText(res, occurrence.chore.effort))
+        if (steps.isNotEmpty()) add(res.getQuantityString(R.plurals.steps_progress, steps.size, occurrence.checkedSteps.size, steps.size))
         add(assignee)
         when (occurrence.state) {
             OccurrenceState.OVERDUE -> add(
@@ -275,6 +283,7 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
         },
     )
     var menuOpen by remember { mutableStateOf(false) }
+    var showSteps by rememberSaveable(occurrence.chore.id, occurrence.key.toString()) { mutableStateOf(false) }
 
     // A small hop when a chore is ticked off.
     val hop = remember { Animatable(1f) }
@@ -289,7 +298,7 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
 
     ListItem(
         leadingContent = {
-            Checkbox(
+            LilyPadCheckbox(
                 checked = occurrence.state == OccurrenceState.COMPLETED,
                 onCheckedChange = if (canAct) ({ viewModel.toggle(occurrence) }) else null,
                 enabled = canAct,
@@ -313,30 +322,61 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
             )
         },
         trailingContent = {
-            if (canAct && !done) {
-                Box {
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.cd_chore_options, occurrence.chore.name))
-                    }
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_snooze_hour)) },
-                            onClick = { menuOpen = false; viewModel.snooze(occurrence, SnoozeOption.ONE_HOUR) },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_snooze_tomorrow)) },
-                            onClick = { menuOpen = false; viewModel.snooze(occurrence, SnoozeOption.TOMORROW_MORNING) },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.action_skip)) },
-                            onClick = { menuOpen = false; viewModel.skip(occurrence) },
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (steps.isNotEmpty()) {
+                    IconButton(onClick = { showSteps = !showSteps }) {
+                        Icon(
+                            if (showSteps) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                            contentDescription = stringResource(if (showSteps) R.string.cd_hide_steps else R.string.cd_show_steps, occurrence.chore.name),
                         )
                     }
                 }
-            } else if (canAct && occurrence.state == OccurrenceState.SKIPPED) {
-                TextButton(onClick = { viewModel.reset(occurrence) }) { Text(stringResource(R.string.action_undo)) }
+                if (canAct && !done) {
+                    Box {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.cd_chore_options, occurrence.chore.name))
+                        }
+                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_snooze_hour)) },
+                                onClick = { menuOpen = false; viewModel.snooze(occurrence, SnoozeOption.ONE_HOUR) },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_snooze_tomorrow)) },
+                                onClick = { menuOpen = false; viewModel.snooze(occurrence, SnoozeOption.TOMORROW_MORNING) },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_skip)) },
+                                onClick = { menuOpen = false; viewModel.skip(occurrence) },
+                            )
+                        }
+                    }
+                } else if (canAct && occurrence.state == OccurrenceState.SKIPPED) {
+                    TextButton(onClick = { viewModel.reset(occurrence) }) { Text(stringResource(R.string.action_undo)) }
+                }
             }
         },
         modifier = Modifier.clickable(role = Role.Button, onClick = { onOpenChore(occurrence.chore.id) }),
     )
+    AnimatedVisibility(visible = showSteps && steps.isNotEmpty(), enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+        Column(Modifier.padding(start = 40.dp, end = 16.dp, bottom = 8.dp)) {
+            steps.forEachIndexed { index, step ->
+                val checked = index in occurrence.checkedSteps
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .toggleable(value = checked, enabled = canAct, role = Role.Checkbox, onValueChange = { viewModel.toggleStep(occurrence, index) }),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LilyPadCheckbox(checked = checked, onCheckedChange = null, enabled = canAct, size = 20.dp)
+                    Text(
+                        step,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textDecoration = if (checked) TextDecoration.LineThrough else null,
+                        color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+    }
 }

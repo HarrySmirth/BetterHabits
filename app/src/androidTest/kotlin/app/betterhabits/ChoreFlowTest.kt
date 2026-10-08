@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -46,6 +47,34 @@ class ChoreFlowTest {
     }
 
     private fun tab(label: String) = compose.onNode(hasText(label) and isSelectable())
+
+    @Test
+    fun useABuiltInTemplateAndTickOffItsSteps() {
+        ActivityScenario.launch(MainActivity::class.java)
+        tab("Chores").performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasContentDescription("Chore templates")).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNode(hasContentDescription("Chore templates")).performClick()
+        compose.onNodeWithTextEventually("Bathroom deep clean").performClick()
+        compose.onNodeWithTextEventually("Use template").performClick()
+        compose.onNodeWithTextEventually("From template: Bathroom deep clean")
+        // The first "Harry" chip is "Who should do it?"; the other is "Never suggest for".
+        compose.onAllNodes(hasText("Harry") and hasClickAction()).onFirst().performScrollTo().performClick()
+        compose.onNodeWithText("Save").performClick()
+
+        compose.waitUntil(5_000) { fakes.choreRepository.chores.isNotEmpty() }
+        val chore = fakes.choreRepository.chores.values.single()
+        assertEquals("builtin.bathroom.deep_clean", chore.templateId)
+        assertEquals("harry", chore.assigneeId)
+        assertEquals(java.time.LocalDate.now(), chore.schedule.startDate)
+
+        compose.onNodeWithTextEventually("Pip's starter library") // back in the library
+        androidx.test.espresso.Espresso.pressBack()
+        tab("Today").performClick()
+        compose.onNodeWithTextEventually("0/5 steps", substring = true)
+        compose.onNode(hasContentDescription("Show steps for Bathroom deep clean")).performClick()
+        compose.onNodeWithTextEventually("Clean sink").performClick()
+        compose.onNodeWithTextEventually("1/5 steps", substring = true)
+    }
 
     @Test
     fun createAChoreAssignedToSomeoneElse() {

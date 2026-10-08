@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "category": "KITCHEN",
+      "templates": [
+        { "key": "empty_dishwasher", "name": "Empty dishwasher", "minutes": 5, "difficulty": 1, "repeat": "DAILY" },
+        { "key": "load_dishwasher", "name": "Load dishwasher", "minutes": 10, "difficulty": 2, "repeat": "DAILY" },
+        { "key": "wash_up", "name": "Wash up", "minutes": 15, "difficulty": 2, "repeat": "DAILY", "steps": ["Wash", "Dry", "Put away", "Wipe the sink"] },
+        { "key": "clean_surfaces", "name": "Clean surfaces", "minutes": 10, "difficulty": 2, "repeat": "DAILY" },
+        { "key": "clean_oven", "name": "Clean oven", "minutes": 45, "difficulty": 4, "repeat": "MONTHLY", "steps": ["Remove racks and soak them", "Apply cleaner", "Scrub inside", "Clean the glass door", "Wipe down and refit racks"] },
+        { "key": "clean_fridge", "name": "Clean fridge", "minutes": 30, "difficulty": 3, "repeat": "MONTHLY", "steps": ["Throw out old food", "Take out shelves", "Wipe inside", "Wash shelves", "Restock"] },
+        { "key": "clean_microwave", "name": "Clean microwave", "minutes": 10, "difficulty": 2, "repeat": "WEEKLY", "interval": 2 }
+      ]
+    },
+    {
+      "category": "BATHROOM",
+      "templates": [
+        { "key": "deep_clean", "name": "Bathroom deep clean", "description": "The full bathroom, top to bottom.", "minutes": 45, "difficulty": 4, "repeat": "WEEKLY", "steps": ["Clean toilet", "Clean sink", "Clean shower", "Clean mirror", "Mop floor"] },
+        { "key": "clean_toilet", "name": "Clean toilet", "minutes": 10, "difficulty": 3, "repeat": "WEEKLY" },
+        { "key": "clean_sink", "name": "Clean sink", "minutes": 5, "difficulty": 2, "repeat": "WEEKLY" },
+        { "key": "clean_shower", "name": "Clean shower", "minutes": 15, "difficulty": 3, "repeat": "WEEKLY" },
+        { "key": "clean_mirror", "name": "Clean mirror", "minutes": 5, "difficulty": 1, "repeat": "WEEKLY" },
+        { "key": "mop_floor", "name": "Mop bathroom floor", "minutes": 10, "difficulty": 2, "repeat": "WEEKLY" },
+        { "key": "change_towels", "name": "Change towels", "minutes": 5, "difficulty": 1, "repeat": "WEEKLY" }
+      ]
+    },
+    {
+      "category": "LIVING_AREAS",
+      "templates": [
+        { "key": "vacuum", "name": "Vacuum", "minutes": 30, "difficulty": 3, "repeat": "WEEKLY" },
+        { "key": "dust", "name": "Dust", "minutes": 20, "difficulty": 2, "repeat": "WEEKLY" },
+        { "key": "mop", "name": "Mop floors", "minutes": 25, "difficulty": 3, "repeat": "WEEKLY" },
+        { "key": "tidy_room", "name": "Tidy room", "minutes": 15, "difficulty": 1, "repeat": "DAILY" },
+        { "key": "weekly_reset", "name": "Weekly living room reset", "minutes": 40, "difficulty": 3, "repeat": "WEEKLY", "steps": ["Clear clutter", "Dust surfaces", "Plump cushions", "Vacuum", "Empty bins"] }
+      ]
+    },
+    {
+      "category": "LAUNDRY",
+      "templates": [
+        { "key": "wash_clothes", "name": "Wash clothes", "minutes": 10, "difficulty": 1, "repeat": "WEEKLY" },
+        { "key": "dry_clothes", "name": "Dry clothes", "minutes": 10, "difficulty": 1, "repeat": "WEEKLY" },
+        { "key": "fold_clothes", "name": "Fold clothes", "minutes": 15, "difficulty": 2, "repeat": "WEEKLY" },
+        { "key": "put_away", "name": "Put clothes away", "minutes": 10, "difficulty": 1, "repeat": "WEEKLY" },
+        { "key": "laundry_day", "name": "Laundry day", "minutes": 45, "difficulty": 2, "repeat": "WEEKLY", "steps": ["Wash clothes", "Dry clothes", "Fold clothes", "Put clothes away"] }
+      ]
+    },
+    {
+      "category": "GARDEN",
+      "templates": [
+        { "key": "mow_lawn", "name": "Mow lawn", "minutes": 45, "difficulty": 4, "repeat": "WEEKLY", "interval": 2 },
+        { "key": "water_plants", "name": "Water plants", "minutes": 10, "difficulty": 1, "repeat": "DAILY", "interval": 2 },
+        { "key": "weed", "name": "Weed", "minutes": 30, "difficulty": 3, "repeat": "WEEKLY", "interval": 2 },
+        { "key": "sweep_patio", "name": "Sweep patio", "minutes": 15, "difficulty": 2, "repeat": "WEEKLY" }
+      ]
+    },
+    {
+      "category": "HOUSEHOLD",
+      "templates": [
+        { "key": "take_bins_out", "name": "Take bins out", "minutes": 10, "difficulty": 2, "repeat": "WEEKLY" },
+        { "key": "recycling", "name": "Recycling", "minutes": 10, "difficulty": 1, "repeat": "WEEKLY" },
+        { "key": "change_bedding", "name": "Change bedding", "minutes": 20, "difficulty": 2, "repeat": "WEEKLY", "interval": 2, "steps": ["Strip the bed", "Wash bedding", "Put on fresh sheets"] },
+        { "key": "grocery_shopping", "name": "Grocery shopping", "minutes": 60, "difficulty": 3, "repeat": "WEEKLY", "steps": ["Check what's needed", "Write the list", "Shop", "Put it all away"] }
+      ]
+    }
+  ]
+}

@@ -138,6 +138,23 @@ class TodayViewModel(
         }
     }
 
+    /** Ticks or unticks one step of a multi-step chore. Ticking the last open step completes it. */
+    fun toggleStep(occurrence: ChoreOccurrence, index: Int) {
+        if (index !in occurrence.chore.checklist.indices) return
+        val current = occurrence.checkedSteps
+        val steps = if (index in current) current - index else current + index
+        val finishes = occurrence.state != OccurrenceState.COMPLETED && steps.size == occurrence.chore.checklist.size
+        val now = clock.instant()
+        act(undo = if (finishes) UndoableAction(occurrence, occurrence.record, completed = true) else null) { householdId ->
+            chores.setCheckedSteps(householdId, occurrence.chore.id, occurrence.key, steps).mapCatching {
+                if (finishes) {
+                    chores.complete(householdId, occurrence.chore.id, occurrence.key, now).getOrThrow()
+                    rotateIfNeeded(occurrence)
+                }
+            }
+        }
+    }
+
     /** "Take turns" chores move to the next person once done (if this user may assign chores). */
     private suspend fun rotateIfNeeded(occurrence: ChoreOccurrence) {
         val context = _state.value.context ?: return

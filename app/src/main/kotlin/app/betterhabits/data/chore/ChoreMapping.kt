@@ -56,6 +56,7 @@ internal object ChoreMapping {
         completedAtMillis = dto.completedAt?.let { parseTimestamp(it).toEpochMilli() },
         snoozedUntilMillis = dto.snoozedUntil?.let { parseTimestamp(it).toEpochMilli() },
         note = dto.note,
+        checkedSteps = encodeSteps(dto.checkedSteps),
         updatedAt = dto.updatedAt,
     )
 
@@ -70,11 +71,17 @@ internal object ChoreMapping {
             completedAt = entity.completedAtMillis?.let(Instant::ofEpochMilli),
             snoozedUntil = entity.snoozedUntilMillis?.let(Instant::ofEpochMilli),
             note = entity.note,
+            checkedSteps = decodeSteps(entity.checkedSteps),
         )
     }
 
     fun key(entity: OccurrenceEntity) =
         OccurrenceKey(LocalDate.parse(entity.date), entity.time.takeIf { it.isNotEmpty() }?.let(LocalTime::parse))
+
+    /** Room stores ticked step indexes as "0,2,3". */
+    fun encodeSteps(steps: Collection<Int>): String = steps.toSortedSet().joinToString(",")
+
+    fun decodeSteps(column: String): Set<Int> = column.split(',').mapNotNullTo(sortedSetOf()) { it.trim().toIntOrNull() }
 
     fun timeColumn(key: OccurrenceKey): String = key.time?.toString().orEmpty()
 

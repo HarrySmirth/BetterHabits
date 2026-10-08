@@ -29,8 +29,12 @@ import kotlin.reflect.KClass
 @Serializable data class HouseholdSettingsRoute(val householdId: String)
 @Serializable data class ChoreDetailRoute(val choreId: String)
 /** choreId null = create a new chore. */
-@Serializable data class ChoreEditorRoute(val choreId: String? = null)
+@Serializable data class ChoreEditorRoute(val choreId: String? = null, val templateId: String? = null)
 @Serializable data object ChoreHistoryRoute
+@Serializable data object TemplatesRoute
+
+/** Edit [templateId], save chore [fromChoreId] as a new template, or copy template [copyOf]; none = blank. */
+@Serializable data class TemplateEditorRoute(val templateId: String? = null, val fromChoreId: String? = null, val copyOf: String? = null)
 /** memberId null = the signed-in user. */
 @Serializable data class PreferencesRoute(val memberId: String? = null)
 @Serializable data object BalanceRoute

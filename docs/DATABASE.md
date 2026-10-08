@@ -66,6 +66,12 @@ When a member leaves a household, `unassign_departed_member` clears their defaul
 - `member_preferences` stores one level per member and target, where the target is a chore or a category. `member_availability` stores unavailable weekdays and preferred times of day. `member_away_periods` stores date ranges. Members edit their own rows, and a parent with `MANAGE_CHILDREN` can edit a child's rows (`private.can_edit_member_data`). Everyone in the household can read them, because the allocator runs on each phone.
 - `chores` gains `assignment_source` (MANUAL or AUTO), `assignment_locked`, `excluded_member_ids` and `rotate`. `guard_chore_write` requires `ASSIGN_CHORES` to change any of them.
 
+### Phase 5: templates
+- `chore_templates` belongs to exactly one scope: a household (`household_id`, readable by its members, writable with `MANAGE_TEMPLATES`) or a person (`owner_id`, private to them). The trigger `guard_template_write` stamps `created_by` and stops a template's scope changing.
+- The built-in library isn't stored in the database. It ships with the app as data (`app/src/main/assets/templates/builtin.json`), and its ids look like `builtin.<category>.<key>`.
+- `chores.template_id` (text, with no foreign key) records which template a chore came from. Template preferences use `member_preferences.target_type = 'TEMPLATE'`, and the allocator checks preferences in this order: chore, then template, then category.
+- `chore_occurrences.checked_steps` (smallint[] of step indexes) records step progress on multi-step chores. Ticking the last step completes the occurrence (the client does this).
+
 ### Deletion and cascades
 - Deleting an auth user cascades to their profile, and from there to their memberships.
 - The trigger `guard_owner_removal` blocks removing an OWNER membership while other members remain, so a household can never be left without an owner.

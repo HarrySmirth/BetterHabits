@@ -43,6 +43,7 @@ class FakeAppContainer(scope: CoroutineScope) : AppContainer {
     )
     override val allocationRepository = FakeAllocationRepository()
     override val allocationPlanner = AllocationPlanner(choreRepository, allocationRepository)
+    override val templateRepository = FakeTemplateRepository()
     override val syncController = FakeSyncController()
     override val syncEngine: SyncEngine? = null
 

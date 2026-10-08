@@ -24,8 +24,9 @@ Before claiming done: unit tests + lint + assembleDebug pass, and UI tests run w
 
 ## Look and feel: light frog theme
 - The "pond" palette (`ui/theme/Color.kt`), Nunito type and round shapes (`ui/theme/Type.kt`) are the default. Dynamic colour is opt-in.
-- Pip the frog (`ui/components/Frog.kt`, `res/drawable/frog_*.xml`, original vector art) appears only in empty states, on sign-in and in celebrations. Use `EmptyState(frog = ...)` for whole-screen states.
-- Keep it light. Use pond touches in friendly copy only where they're natural, never in functional labels or errors, and don't add frogs elsewhere. Pip may gain a personality later, but not unprompted.
+- Pip the frog (`ui/components/Frog.kt`, `res/drawable/frog_*.xml`, original vector art) appears in empty states, on sign-in, in the Today progress card, in the template library header and as the loading indicator (`HoppingFrog` via `LoadingState`). Tapping Pip makes him hop and say "Ribbit!". Use `EmptyState(frog = ...)` for whole-screen states.
+- Checkboxes for chores and steps are `LilyPadCheckbox`. Use it rather than the Material `Checkbox`.
+- The theme is moderately froggy: the user asked for "a little more froggy" than the first pass. Use pond touches in friendly copy where they're natural, never in functional labels or errors. Pip may gain a personality later, but not unprompted.
 
 ## Security rules (public repo)
 - Never commit secrets. `secrets.properties` (Supabase URL + **publishable** key), `keystore.properties`, `*.jks`, `.env` and `local.properties` are all git-ignored.

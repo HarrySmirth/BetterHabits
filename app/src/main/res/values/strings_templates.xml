@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pip -->
+    <string name="frog_ribbit">Ribbit!</string>
+    <string name="loading">Loading</string>
+
+    <!-- Library -->
+    <string name="templates_title">Templates</string>
+    <string name="cd_templates">Chore templates</string>
+    <string name="templates_search">Search templates</string>
+    <string name="templates_household">Household templates</string>
+    <string name="templates_personal">My templates</string>
+    <string name="templates_builtin">Pip\'s starter library</string>
+    <string name="templates_builtin_body">Common chores with sensible estimates. Use one as it is, or make a copy to tweak it.</string>
+    <string name="templates_no_match_title">No templates match</string>
+    <string name="templates_no_match_body">Try a different word, or create your own template.</string>
+    <string name="action_new_template">New template</string>
+    <string name="action_browse_templates">Browse templates</string>
+    <plurals name="template_steps">
+        <item quantity="one">%1$d step</item>
+        <item quantity="other">%1$d steps</item>
+    </plurals>
+    <string name="template_repeat_once">Once</string>
+    <plurals name="template_repeat_daily">
+        <item quantity="one">Daily</item>
+        <item quantity="other">Every %1$d days</item>
+    </plurals>
+    <plurals name="template_repeat_weekly">
+        <item quantity="one">Weekly</item>
+        <item quantity="other">Every %1$d weeks</item>
+    </plurals>
+    <plurals name="template_repeat_monthly">
+        <item quantity="one">Monthly</item>
+        <item quantity="other">Every %1$d months</item>
+    </plurals>
+
+    <!-- Details sheet -->
+    <string name="action_use_template">Use template</string>
+    <string name="action_make_copy">Make a copy</string>
+    <string name="action_edit_template">Edit</string>
+    <string name="template_my_preference">How you feel about it</string>
+    <string name="template_preference_body">Chores made from this template use this preference when sharing out work.</string>
+    <string name="template_pref_none">Not set</string>
+    <string name="template_delete_title">Delete \"%1$s\"?</string>
+    <string name="template_delete_body">Chores already made from it aren\'t affected.</string>
+    <string name="template_scope_household">Shared with the household</string>
+    <string name="template_scope_personal">Only you can see it</string>
+    <string name="template_scope_builtin">Built in</string>
+
+    <!-- Editor -->
+    <string name="template_editor_new">New template</string>
+    <string name="template_editor_edit">Edit template</string>
+    <string name="field_template_name">Name</string>
+    <string name="template_q_who_sees">Who can use it?</string>
+    <string name="template_scope_household_option">Everyone in the household</string>
+    <string name="template_scope_personal_option">Just me</string>
+    <string name="template_scope_fixed">This can\'t be changed after creating the template.</string>
+    <string name="template_q_steps">Steps</string>
+    <string name="template_steps_body">Optional. Steps can be ticked off one by one, and ticking the last one finishes the chore.</string>
+    <string name="cd_move_step_up">Move \"%1$s\" up</string>
+    <string name="cd_move_step_down">Move \"%1$s\" down</string>
+    <string name="cd_remove_step">Remove \"%1$s\"</string>
+    <string name="validation_template_name">Give the template a name</string>
+
+    <!-- Using templates from chores -->
+    <string name="editor_from_template">From template: %1$s</string>
+    <string name="action_save_as_template">Save as template</string>
+    <string name="prefs_templates">Templates</string>
+    <string name="prefs_templates_body">Preferences you\'ve set on templates apply to every chore made from them. Set them in the template library.</string>
+
+    <!-- Multi-step chores -->
+    <plurals name="steps_progress">
+        <item quantity="one">%1$d/%2$d step</item>
+        <item quantity="other">%1$d/%2$d steps</item>
+    </plurals>
+    <string name="cd_show_steps">Show steps for %1$s</string>
+    <string name="cd_hide_steps">Hide steps for %1$s</string>
+    <string name="steps_heading">Steps</string>
+</resources>

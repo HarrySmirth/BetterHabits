@@ -9,6 +9,7 @@ import app.betterhabits.data.allocation.PreferenceTarget
 import app.betterhabits.data.chore.ChoreRepository
 import app.betterhabits.data.household.HouseholdRepository
 import app.betterhabits.data.household.HouseholdSession
+import app.betterhabits.data.template.TemplateRepository
 import app.betterhabits.domain.allocation.Availability
 import app.betterhabits.domain.allocation.DateRange
 import app.betterhabits.domain.allocation.MemberPreferences
@@ -41,6 +42,8 @@ data class PreferencesUiState(
     val preferences: MemberPreferences = MemberPreferences(""),
     val availability: Availability = Availability(""),
     val awayPeriods: List<AwayPeriod> = emptyList(),
+    /** Template names by id, for showing template preferences. */
+    val templateNames: Map<String, String> = emptyMap(),
     val message: AppError? = null,
 ) {
     val isMe get() = context?.myId == memberId
@@ -60,6 +63,7 @@ class PreferencesViewModel(
     private val chores: ChoreRepository,
     private val households: HouseholdRepository,
     private val session: HouseholdSession,
+    private val templates: TemplateRepository,
 ) : ViewModel() {
 
     /** Route arg (see PreferencesRoute); null = the signed-in user. */
@@ -95,6 +99,7 @@ class PreferencesViewModel(
                     preferences = inputs.preferencesOf(memberId),
                     availability = inputs.availabilityOf(memberId),
                     awayPeriods = inputs.awayPeriods.filter { a -> a.memberId == memberId }.sortedBy { a -> a.range.start },
+                    templateNames = templates.templates(householdId).getOrNull().orEmpty().associate { t -> t.id to t.name },
                 )
             }
         }
@@ -110,6 +115,11 @@ class PreferencesViewModel(
     fun setCategoryPreference(category: ChoreCategory, level: PreferenceLevel?) = edit(
         local = { p -> p.copy(byCategory = if (level == null) p.byCategory - category else p.byCategory + (category to level)) },
         remote = { h, m -> allocation.setPreference(h, m, PreferenceTarget.CategoryTarget(category), level) },
+    )
+
+    fun setTemplatePreference(templateId: String, level: PreferenceLevel?) = edit(
+        local = { p -> p.copy(byTemplate = if (level == null) p.byTemplate - templateId else p.byTemplate + (templateId to level)) },
+        remote = { h, m -> allocation.setPreference(h, m, PreferenceTarget.TemplateTarget(templateId), level) },
     )
 
     fun toggleUnavailableDay(day: DayOfWeek) {

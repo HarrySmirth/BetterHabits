@@ -33,6 +33,8 @@ data class Chore(
     val excludedMemberIds: Set<String> = emptySet(),
     /** Take turns: after each completion the next person is chosen, balanced with workload. */
     val rotate: Boolean = false,
+    /** The template this chore was created from (a template id or a built-in key), for template preferences. */
+    val templateId: String? = null,
 ) {
     init {
         require(difficulty in 1..5) { "difficulty must be 1..5" }
@@ -65,6 +67,8 @@ data class OccurrenceRecord(
     val completedAt: Instant? = null,
     val snoozedUntil: Instant? = null,
     val note: String? = null,
+    /** Indexes of the chore's checklist steps ticked off for this occurrence. */
+    val checkedSteps: Set<Int> = emptySet(),
 )
 
 /** Display state of an occurrence at a given moment. */
@@ -92,6 +96,12 @@ data class ChoreOccurrence(
     val assigneeId: String? get() = record?.assigneeId ?: chore.assigneeId
     val completedBy: String? get() = record?.completedBy
     val isDone: Boolean get() = state == OccurrenceState.COMPLETED || state == OccurrenceState.SKIPPED
+
+    /** Ticked steps that still exist in the chore's checklist. */
+    val checkedSteps: Set<Int> get() = record?.checkedSteps.orEmpty().filterTo(sortedSetOf()) { it in chore.checklist.indices }
+
+    /** True when every step of a multi-step chore is ticked (false for chores without steps). */
+    val allStepsChecked: Boolean get() = chore.checklist.isNotEmpty() && checkedSteps.size == chore.checklist.size
 
     /** When it should next be shown as actionable: the snooze time if snoozed, else the due time. */
     val effectiveDueAt: Instant get() = record?.snoozedUntil?.takeIf { state == OccurrenceState.SNOOZED } ?: dueAt

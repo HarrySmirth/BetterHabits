@@ -1,5 +1,7 @@
 package app.betterhabits.data.local
 
+import androidx.room.AutoMigration
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -17,8 +19,9 @@ import kotlinx.coroutines.flow.Flow
  */
 @Database(
     entities = [ChoreEntity::class, OccurrenceEntity::class, OutboxEntity::class, SyncCursorEntity::class, CacheEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun choreDao(): ChoreDao
@@ -56,6 +59,8 @@ data class OccurrenceEntity(
     val snoozedUntilMillis: Long?,
     val note: String?,
     val updatedAt: String?,
+    /** Ticked checklist steps, see ChoreMapping.encodeSteps. */
+    @ColumnInfo(defaultValue = "") val checkedSteps: String = "",
 )
 
 /** A local change waiting to be sent to the server, in [seq] order. */

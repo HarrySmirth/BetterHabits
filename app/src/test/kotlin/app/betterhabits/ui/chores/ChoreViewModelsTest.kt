@@ -19,6 +19,7 @@ import app.betterhabits.testing.FakeChoreRepository
 import app.betterhabits.testing.FakeHouseholdRepository
 import app.betterhabits.testing.FakeProfileRepository
 import app.betterhabits.testing.FakeSyncController
+import app.betterhabits.testing.FakeTemplateRepository
 import app.betterhabits.testing.FakeUserPreferencesRepository
 import app.betterhabits.testing.MainDispatcherRule
 import app.betterhabits.ui.today.AgendaFilter
@@ -198,7 +199,7 @@ class ChoreViewModelsTest {
     @Test
     fun `editor validates, then creates a weekly chore`() = runTest {
         signIn("harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, FakeTemplateRepository(), clock)
         val form = vm.state.value.form
         assertEquals(today, form.startDate)
         assertEquals(setOf(DayOfWeek.THURSDAY), form.weekdays)
@@ -224,7 +225,7 @@ class ChoreViewModelsTest {
     @Test
     fun `editor monthly options are anchored to the start date`() = runTest {
         signIn("harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, FakeTemplateRepository(), clock)
         vm.onRepeat(RepeatKind.MONTHLY)
         assertEquals(Recurrence.MonthlyOnDay(8), vm.state.value.form.recurrence())
         vm.onMonthlyMode(MonthlyMode.WEEKDAY)
@@ -237,7 +238,7 @@ class ChoreViewModelsTest {
     fun `editor loads an existing chore and saves edits in place`() = runTest {
         chore("dishes", Recurrence.Daily(interval = 2), "harry", minutes = 20)
         signIn("harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(mapOf("choreId" to "dishes")), chores, households, session, planner, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(mapOf("choreId" to "dishes")), chores, households, session, planner, FakeTemplateRepository(), clock)
         assertEquals(RepeatKind.DAILY, vm.state.value.form.repeat)
         assertEquals(2, vm.state.value.form.interval)
 

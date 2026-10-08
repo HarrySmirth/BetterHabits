@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.History
@@ -47,6 +49,7 @@ fun ChoresScreen(
     onOpenChore: (String) -> Unit,
     onOpenHistory: () -> Unit,
     onSuggestAssignments: () -> Unit,
+    onOpenTemplates: () -> Unit,
     viewModel: ChoresViewModel = viewModel(factory = AppViewModelFactory.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -67,6 +70,9 @@ fun ChoresScreen(
                 IconButton(onClick = onSuggestAssignments) {
                     Icon(Icons.Outlined.AutoFixHigh, contentDescription = stringResource(R.string.action_suggest_assignments))
                 }
+            }
+            IconButton(onClick = onOpenTemplates) {
+                Icon(Icons.AutoMirrored.Outlined.LibraryBooks, contentDescription = stringResource(R.string.cd_templates))
             }
             IconButton(onClick = onOpenHistory) {
                 Icon(Icons.Outlined.History, contentDescription = stringResource(R.string.history_title))
@@ -93,6 +99,11 @@ fun ChoresScreen(
                 title = stringResource(R.string.chores_empty_title),
                 body = stringResource(if (state.canCreate) R.string.chores_empty_body else R.string.chores_empty_body_readonly),
                 modifier = Modifier.padding(padding),
+                action = if (state.canCreate) {
+                    { OutlinedButton(onClick = onOpenTemplates) { Text(stringResource(R.string.action_browse_templates)) } }
+                } else {
+                    null
+                },
             )
             else -> PullToRefreshBox(
                 isRefreshing = state.refreshing,

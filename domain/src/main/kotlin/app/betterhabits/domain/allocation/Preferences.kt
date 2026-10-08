@@ -21,14 +21,18 @@ enum class PreferenceLevel(val score: Int) {
     val isUndesirable: Boolean get() = this == DISLIKE || this == HATE
 }
 
-/** One person's preferences: per chore, falling back to per category, then neutral. */
+/**
+ * One person's preferences: per chore, falling back to the template the chore came from, then its
+ * category, then neutral.
+ */
 data class MemberPreferences(
     val memberId: String,
     val byChore: Map<String, PreferenceLevel> = emptyMap(),
     val byCategory: Map<ChoreCategory, PreferenceLevel> = emptyMap(),
+    val byTemplate: Map<String, PreferenceLevel> = emptyMap(),
 ) {
     fun forChore(chore: Chore): PreferenceLevel =
-        byChore[chore.id] ?: byCategory[chore.category] ?: PreferenceLevel.NEUTRAL
+        byChore[chore.id] ?: chore.templateId?.let(byTemplate::get) ?: byCategory[chore.category] ?: PreferenceLevel.NEUTRAL
 }
 
 enum class TimeOfDay {

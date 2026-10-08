@@ -47,6 +47,7 @@ data class ChoreDto(
     @SerialName("assignment_locked") val assignmentLocked: Boolean = false,
     @SerialName("excluded_member_ids") val excludedMemberIds: List<String> = emptyList(),
     val rotate: Boolean = false,
+    @SerialName("template_id") val templateId: String? = null,
     @SerialName("created_by") val createdBy: String? = null,
     // Server-maintained; never sent by the client (see ChoreDto.writableJson).
     @SerialName("updated_at") val updatedAt: String? = null,
@@ -80,6 +81,7 @@ data class ChoreDto(
             assignmentLocked = assignmentLocked,
             excludedMemberIds = excludedMemberIds.toSet(),
             rotate = rotate,
+            templateId = templateId,
         )
     }
 
@@ -138,6 +140,7 @@ data class ChoreDto(
                 assignmentLocked = chore.assignmentLocked,
                 excludedMemberIds = chore.excludedMemberIds.sorted(),
                 rotate = chore.rotate,
+                templateId = chore.templateId,
             )
         }
     }
@@ -154,6 +157,7 @@ data class OccurrenceDto(
     @SerialName("completed_at") val completedAt: String? = null,
     @SerialName("snoozed_until") val snoozedUntil: String? = null,
     val note: String? = null,
+    @SerialName("checked_steps") val checkedSteps: List<Int> = emptyList(),
     @SerialName("updated_at") val updatedAt: String? = null,
 ) {
     fun toDomain(): OccurrenceRecord? {
@@ -167,6 +171,7 @@ data class OccurrenceDto(
             completedAt = completedAt?.let(::parseTimestamp),
             snoozedUntil = snoozedUntil?.let(::parseTimestamp),
             note = note,
+            checkedSteps = checkedSteps.toSet(),
         )
     }
 }

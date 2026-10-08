@@ -47,7 +47,7 @@ import app.betterhabits.domain.error.AppError
 @Composable
 fun LoadingState(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+        HoppingFrog()
     }
 }
 

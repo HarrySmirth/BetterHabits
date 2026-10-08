@@ -101,6 +101,10 @@ class FakeChoreRepository(private val currentUserId: () -> String?) : ChoreRepos
         upsert(choreId, key) { it.copy(status = OccurrenceStatus.PENDING, completedBy = null, completedAt = null, snoozedUntil = until) }
     }
 
+    override suspend fun setCheckedSteps(householdId: String, choreId: String, key: OccurrenceKey, steps: Set<Int>) = call {
+        upsert(choreId, key) { it.copy(checkedSteps = steps) }
+    }
+
     override suspend fun reassignOccurrence(householdId: String, choreId: String, key: OccurrenceKey, assigneeId: String?) = call {
         upsert(choreId, key) { it.copy(assigneeId = assigneeId) }
     }

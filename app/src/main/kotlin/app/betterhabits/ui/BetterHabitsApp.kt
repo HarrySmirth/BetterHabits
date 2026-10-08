@@ -44,7 +44,11 @@ import app.betterhabits.ui.navigation.HouseholdSettingsRoute
 import app.betterhabits.ui.navigation.HouseholdSetupRoute
 import app.betterhabits.ui.navigation.MemberDetailRoute
 import app.betterhabits.ui.navigation.ProfileRoute
+import app.betterhabits.ui.navigation.TemplateEditorRoute
+import app.betterhabits.ui.navigation.TemplatesRoute
 import app.betterhabits.ui.navigation.TodayRoute
+import app.betterhabits.ui.templates.TemplateEditorScreen
+import app.betterhabits.ui.templates.TemplatesScreen
 import app.betterhabits.ui.navigation.TopLevelDestination
 import app.betterhabits.ui.profile.ProfileScreen
 import app.betterhabits.ui.today.TodayScreen
@@ -99,6 +103,7 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
                     onOpenChore = { navController.navigate(ChoreDetailRoute(it)) },
                     onOpenHistory = { navController.navigate(ChoreHistoryRoute) },
                     onSuggestAssignments = { navController.navigate(AllocationReviewRoute) },
+                    onOpenTemplates = { navController.navigate(TemplatesRoute) },
                 )
             }
             composable<HabitsRoute> { HabitsScreen() }
@@ -117,10 +122,24 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
             }
             composable<HouseholdSettingsRoute> { HouseholdSettingsScreen(onBack = navController::popBackStack) }
             composable<ChoreDetailRoute> {
-                ChoreDetailScreen(onBack = navController::popBackStack, onEdit = { navController.navigate(ChoreEditorRoute(it)) })
+                ChoreDetailScreen(
+                    onBack = navController::popBackStack,
+                    onEdit = { navController.navigate(ChoreEditorRoute(it)) },
+                    onSaveAsTemplate = { navController.navigate(TemplateEditorRoute(fromChoreId = it)) },
+                )
             }
             composable<ChoreEditorRoute> { ChoreEditorScreen(onClose = navController::popBackStack) }
             composable<ChoreHistoryRoute> { HistoryScreen(onBack = navController::popBackStack) }
+            composable<TemplatesRoute> {
+                TemplatesScreen(
+                    onBack = navController::popBackStack,
+                    onUse = { navController.navigate(ChoreEditorRoute(templateId = it)) },
+                    onEdit = { navController.navigate(TemplateEditorRoute(templateId = it)) },
+                    onCopy = { navController.navigate(TemplateEditorRoute(copyOf = it)) },
+                    onNew = { navController.navigate(TemplateEditorRoute()) },
+                )
+            }
+            composable<TemplateEditorRoute> { TemplateEditorScreen(onClose = navController::popBackStack) }
             composable<PreferencesRoute> { PreferencesScreen(onBack = navController::popBackStack) }
             composable<BalanceRoute> {
                 BalanceScreen(onBack = navController::popBackStack, onSuggest = { navController.navigate(AllocationReviewRoute) })
