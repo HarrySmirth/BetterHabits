@@ -25,6 +25,14 @@ data class Chore(
     val requiresProof: Boolean = false,
     val active: Boolean = true,
     val createdBy: String? = null,
+    /** Who chose the current assignee: a person, or the allocator. */
+    val assignmentSource: AssignmentSource = AssignmentSource.MANUAL,
+    /** Locked assignments are never changed by automatic allocation. */
+    val assignmentLocked: Boolean = false,
+    /** Members the allocator must never pick for this chore. */
+    val excludedMemberIds: Set<String> = emptySet(),
+    /** Take turns: after each completion the next person is chosen, balanced with workload. */
+    val rotate: Boolean = false,
 ) {
     init {
         require(difficulty in 1..5) { "difficulty must be 1..5" }
@@ -37,6 +45,8 @@ data class Chore(
         const val MAX_NAME_LENGTH = 80
     }
 }
+
+enum class AssignmentSource { MANUAL, AUTO }
 
 enum class OccurrenceStatus { PENDING, COMPLETED, SKIPPED }
 
