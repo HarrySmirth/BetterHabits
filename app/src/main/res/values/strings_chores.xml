@@ -72,6 +72,8 @@
         <item quantity="one">%1$d of %2$d chore done</item>
         <item quantity="other">%1$d of %2$d chores done</item>
     </plurals>
+    <string name="today_all_done_title">All done for today</string>
+    <string name="today_all_done_body">Time to put your feet up on a lily pad.</string>
     <string name="today_remaining">About %1$s left</string>
     <string name="today_marked_done">%1$s done</string>
     <string name="today_updated">%1$s updated</string>

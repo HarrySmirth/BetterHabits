@@ -1,6 +1,22 @@
 package app.betterhabits.ui.today
 
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import app.betterhabits.ui.components.Frog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +30,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -58,6 +73,7 @@ import app.betterhabits.ui.chores.dueText
 import app.betterhabits.ui.chores.effortText
 import app.betterhabits.ui.chores.resources
 import app.betterhabits.ui.components.EmptyState
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
 import app.betterhabits.ui.components.SyncStatusBanner
@@ -147,7 +163,7 @@ private fun TodayContent(state: TodayUiState, viewModel: TodayViewModel, onOpenC
             item {
                 Box(Modifier.padding(top = 48.dp)) {
                     EmptyState(
-                        icon = Icons.Outlined.WbSunny,
+                        frog = FrogMood.SLEEPY,
                         title = stringResource(R.string.today_empty_title),
                         body = stringResource(
                             if (state.filter == AgendaFilter.MINE) R.string.today_empty_mine else R.string.today_empty_body,
@@ -182,22 +198,43 @@ private fun LazyListScope.section(
 @Composable
 private fun ProgressCard(state: TodayUiState) {
     val res = resources()
-    Card(Modifier.fillMaxWidth().padding(16.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                pluralStringResource(R.plurals.today_progress, state.totalCount, state.doneCount, state.totalCount),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            LinearProgressIndicator(
-                progress = { if (state.totalCount == 0) 0f else state.doneCount.toFloat() / state.totalCount },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (state.remainingEffort.minutes > 0) {
+    val allDone = state.totalCount > 0 && state.doneCount == state.totalCount
+    Card(
+        Modifier.fillMaxWidth().padding(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    stringResource(R.string.today_remaining, effortText(res, state.remainingEffort)),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    if (allDone) {
+                        stringResource(R.string.today_all_done_title)
+                    } else {
+                        pluralStringResource(R.plurals.today_progress, state.totalCount, state.doneCount, state.totalCount)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
+                LinearProgressIndicator(
+                    progress = { if (state.totalCount == 0) 0f else state.doneCount.toFloat() / state.totalCount },
+                    modifier = Modifier.fillMaxWidth().height(8.dp),
+                    trackColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    strokeCap = StrokeCap.Round,
+                )
+                when {
+                    allDone -> Text(
+                        stringResource(R.string.today_all_done_body),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                    state.remainingEffort.minutes > 0 -> Text(
+                        stringResource(R.string.today_remaining, effortText(res, state.remainingEffort)),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+            }
+            AnimatedVisibility(visible = allDone, enter = scaleIn() + fadeIn(), exit = fadeOut()) {
+                Frog(FrogMood.CELEBRATE, Modifier.padding(start = 8.dp), width = 88.dp)
             }
         }
     }
@@ -239,13 +276,26 @@ private fun OccurrenceRow(occurrence: ChoreOccurrence, state: TodayUiState, view
     )
     var menuOpen by remember { mutableStateOf(false) }
 
+    // A small hop when a chore is ticked off.
+    val hop = remember { Animatable(1f) }
+    var wasCompleted by remember { mutableStateOf(completed) }
+    LaunchedEffect(completed) {
+        if (completed && !wasCompleted) {
+            hop.animateTo(1.3f, tween(110))
+            hop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+        }
+        wasCompleted = completed
+    }
+
     ListItem(
         leadingContent = {
             Checkbox(
                 checked = occurrence.state == OccurrenceState.COMPLETED,
                 onCheckedChange = if (canAct) ({ viewModel.toggle(occurrence) }) else null,
                 enabled = canAct,
-                modifier = Modifier.semantics { stateDescription = stateLabel },
+                modifier = Modifier
+                    .graphicsLayer { scaleX = hop.value; scaleY = hop.value }
+                    .semantics { stateDescription = stateLabel },
             )
         },
         headlineContent = {

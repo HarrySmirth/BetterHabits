@@ -46,7 +46,7 @@ import app.betterhabits.ui.chores.resources
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
 import app.betterhabits.ui.components.OnScreenResume
-import kotlin.math.roundToInt
+import java.text.NumberFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,4 +161,4 @@ private fun MemberCard(member: MemberWorkload, context: HouseholdContext) {
     }
 }
 
-private fun percent(fraction: Double): String = "${(fraction * 1000).roundToInt() / 10.0}%"
+private fun percent(fraction: Double): String = NumberFormat.getPercentInstance().format(fraction)

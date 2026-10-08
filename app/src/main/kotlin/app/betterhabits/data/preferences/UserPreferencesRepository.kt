@@ -7,7 +7,7 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 /** Device-local settings. Not synced: each device can look different. */
 data class UserPreferences(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val useDynamicColor: Boolean = true,
+    val useDynamicColor: Boolean = false,
     /** Household shown in household-scoped screens; falls back to the first one when null/unknown. */
     val selectedHouseholdId: String? = null,
 )

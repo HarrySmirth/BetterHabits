@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -55,7 +54,7 @@ fun LoadingState(modifier: Modifier = Modifier) {
 @Composable
 fun ErrorState(error: AppError, onRetry: () -> Unit, modifier: Modifier = Modifier, extraAction: (@Composable () -> Unit)? = null) {
     EmptyState(
-        icon = Icons.Outlined.CloudOff,
+        frog = FrogMood.PUZZLED,
         title = stringResource(R.string.error_title),
         body = stringResource(error.messageRes()),
         modifier = modifier,

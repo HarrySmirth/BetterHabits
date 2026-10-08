@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed (monochrome) launcher icon: frog silhouette with eyes. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M27,63 a27,15 0 1,0 54,0 a27,15 0 1,0 -54,0 z" />
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd" android:pathData="M31,42 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0 z M36.5,42 a5.5,5.5 0 1,0 11.0,0 a5.5,5.5 0 1,0 -11.0,0 z" />
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd" android:pathData="M55,42 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0 z M60.5,42 a5.5,5.5 0 1,0 11.0,0 a5.5,5.5 0 1,0 -11.0,0 z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M40.2,43 a2.8,2.8 0 1,0 5.6,0 a2.8,2.8 0 1,0 -5.6,0 z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M64.2,43 a2.8,2.8 0 1,0 5.6,0 a2.8,2.8 0 1,0 -5.6,0 z" />
+</vector>

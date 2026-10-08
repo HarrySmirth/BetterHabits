@@ -2,8 +2,6 @@ package app.betterhabits.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
@@ -15,6 +13,7 @@ import app.betterhabits.R
 import app.betterhabits.data.household.SessionState
 import app.betterhabits.ui.auth.AuthNavHost
 import app.betterhabits.ui.components.EmptyState
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
 import app.betterhabits.ui.household.HouseholdSetupScreen
@@ -26,7 +25,7 @@ fun BetterHabitsRoot(session: SessionState, onRetry: () -> Unit, onSignOut: () -
         when (session) {
             SessionState.Loading -> LoadingState()
             SessionState.NotConfigured -> EmptyState(
-                icon = Icons.Outlined.CloudOff,
+                frog = FrogMood.PUZZLED,
                 title = stringResource(R.string.not_configured_title),
                 body = stringResource(R.string.not_configured_body),
             )

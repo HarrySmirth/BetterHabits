@@ -22,7 +22,7 @@ fun isDarkTheme(themeMode: ThemeMode): Boolean = when (themeMode) {
 @Composable
 fun BetterHabitsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -33,5 +33,5 @@ fun BetterHabitsTheme(
         darkTheme -> DarkColors
         else -> LightColors
     }
-    MaterialTheme(colorScheme = colorScheme, content = content)
+    MaterialTheme(colorScheme = colorScheme, typography = AppTypography, shapes = AppShapes, content = content)
 }

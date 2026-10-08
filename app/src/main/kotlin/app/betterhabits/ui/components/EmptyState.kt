@@ -15,12 +15,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
+/** Centred illustration, title and body. Prefer a [frog] for whole-screen states; [icon] for small ones. */
 @Composable
 fun EmptyState(
-    icon: ImageVector,
     title: String,
     body: String,
     modifier: Modifier = Modifier,
+    frog: FrogMood? = null,
+    icon: ImageVector? = null,
     action: (@Composable () -> Unit)? = null,
 ) {
     Column(
@@ -30,12 +32,16 @@ fun EmptyState(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        if (frog != null) {
+            Frog(frog, Modifier.padding(bottom = 4.dp))
+        } else if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,

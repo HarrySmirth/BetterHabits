@@ -82,7 +82,7 @@ class ChoreFlowTest {
         compose.onNodeWithTextEventually("0 of 1 chore done")
         compose.onNode(isToggleable()).performClick()
 
-        compose.onNodeWithTextEventually("1 of 1 chore done")
+        compose.onNodeWithTextEventually("All done for today")
         compose.onNodeWithTextEventually("Done")
         compose.waitUntil(5_000) { fakes.choreRepository.records.values.any { it.status == OccurrenceStatus.COMPLETED } }
         assertEquals("harry", fakes.choreRepository.records.values.single().completedBy)

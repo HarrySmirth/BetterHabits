@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +35,7 @@ import app.betterhabits.domain.model.ChoreOccurrence
 import app.betterhabits.domain.model.OccurrenceState
 import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.components.EmptyState
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
 
@@ -86,7 +86,7 @@ fun HistoryScreen(onBack: () -> Unit, viewModel: HistoryViewModel = viewModel(fa
                 if (state.visible.isEmpty()) {
                     item {
                         EmptyState(
-                            icon = Icons.Outlined.History,
+                            frog = FrogMood.HAPPY,
                             title = stringResource(R.string.history_empty_title),
                             body = stringResource(R.string.history_empty_body),
                             modifier = Modifier.padding(top = 48.dp),

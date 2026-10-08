@@ -23,7 +23,7 @@ class DataStoreUserPreferencesRepository(
                 themeMode = prefs[THEME_MODE]
                     ?.let { stored -> ThemeMode.entries.firstOrNull { it.name == stored } }
                     ?: ThemeMode.SYSTEM,
-                useDynamicColor = prefs[DYNAMIC_COLOR] ?: true,
+                useDynamicColor = prefs[DYNAMIC_COLOR] ?: false,
                 selectedHouseholdId = prefs[SELECTED_HOUSEHOLD],
             )
         }

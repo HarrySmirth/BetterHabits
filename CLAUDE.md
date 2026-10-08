@@ -22,6 +22,11 @@ Kotlin 2.4 · Jetpack Compose + Material 3 · Navigation Compose (type-safe rout
 ```
 Before claiming done: unit tests + lint + assembleDebug pass, and UI tests run when UI flows changed.
 
+## Look and feel: light frog theme
+- The "pond" palette (`ui/theme/Color.kt`), Nunito type and round shapes (`ui/theme/Type.kt`) are the default. Dynamic colour is opt-in.
+- Pip the frog (`ui/components/Frog.kt`, `res/drawable/frog_*.xml`, original vector art) appears only in empty states, on sign-in and in celebrations. Use `EmptyState(frog = ...)` for whole-screen states.
+- Keep it light. Use pond touches in friendly copy only where they're natural, never in functional labels or errors, and don't add frogs elsewhere. Pip may gain a personality later, but not unprompted.
+
 ## Security rules (public repo)
 - Never commit secrets. `secrets.properties` (Supabase URL + **publishable** key), `keystore.properties`, `*.jks`, `.env` and `local.properties` are all git-ignored.
 - **Never** use the Supabase service-role/secret key in the app or repo. Privileged operations go in Edge Functions, with the key in Supabase function secrets.

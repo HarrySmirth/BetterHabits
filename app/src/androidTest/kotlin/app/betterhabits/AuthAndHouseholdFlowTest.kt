@@ -38,7 +38,7 @@ class AuthAndHouseholdFlowTest {
     private fun signIn(email: String, password: String) {
         compose.typeInto("email", email)
         compose.typeInto("password", password)
-        compose.onNode(hasText("Sign in") and hasClickAction()).performClick()
+        compose.onNode(hasText("Sign in") and hasClickAction()).performScrollTo().performClick()
     }
 
     private fun openHouseholdTab() {
@@ -53,7 +53,7 @@ class AuthAndHouseholdFlowTest {
 
         compose.onNodeWithTag("password").performTextClearance()
         compose.onNodeWithTag("password").performTextInput("correct-horse")
-        compose.onNode(hasText("Sign in") and hasClickAction()).performClick()
+        compose.onNode(hasText("Sign in") and hasClickAction()).performScrollTo().performClick()
         compose.onNodeWithTextEventually("Set up your household")
     }
 

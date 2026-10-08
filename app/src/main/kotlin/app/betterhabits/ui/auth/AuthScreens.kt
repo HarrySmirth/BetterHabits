@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,6 +47,8 @@ import app.betterhabits.domain.error.appError
 import app.betterhabits.domain.model.Validation
 import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.components.CenteredFormColumn
+import app.betterhabits.ui.components.Frog
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.FormError
 import app.betterhabits.ui.components.PasswordField
 import app.betterhabits.ui.components.ProgressButton
@@ -118,7 +119,7 @@ fun SignInScreen(
     }
 
     AuthScaffold(onBack = null) {
-        Icon(Icons.Outlined.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp))
+        Frog(FrogMood.HAPPY, width = 120.dp)
         ScreenTitle(stringResource(R.string.sign_in_title), stringResource(R.string.sign_in_subtitle))
         Spacer(Modifier.height(8.dp))
         EmailField(state.email, viewModel::onEmailChange, isError = state.showValidation && !state.emailValid)

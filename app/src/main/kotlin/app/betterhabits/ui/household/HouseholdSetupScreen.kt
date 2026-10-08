@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.FamilyRestroom
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -48,6 +47,7 @@ import app.betterhabits.R
 import app.betterhabits.domain.model.PendingInvitation
 import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.components.EmptyState
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.FormError
 import app.betterhabits.ui.components.ProgressButton
 import app.betterhabits.ui.components.labelRes
@@ -86,7 +86,7 @@ fun HouseholdSetupScreen(
     ) { padding ->
         if (state.isChild) {
             EmptyState(
-                icon = Icons.Outlined.FamilyRestroom,
+                frog = FrogMood.HAPPY,
                 title = stringResource(R.string.setup_child_title),
                 body = stringResource(R.string.setup_child_body),
                 modifier = Modifier.padding(padding),

@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -48,6 +47,7 @@ import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.chores.effortText
 import app.betterhabits.ui.chores.resources
 import app.betterhabits.ui.components.EmptyState
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
 import app.betterhabits.ui.components.SectionHeader
@@ -120,7 +120,7 @@ fun AllocationReviewScreen(onClose: () -> Unit, viewModel: AllocationReviewViewM
                 if (state.changes.isEmpty()) {
                     item {
                         EmptyState(
-                            icon = Icons.Outlined.CheckCircle,
+                            frog = FrogMood.HAPPY,
                             title = stringResource(R.string.review_no_changes_title),
                             body = stringResource(R.string.review_no_changes_body),
                             modifier = Modifier.padding(top = 32.dp),

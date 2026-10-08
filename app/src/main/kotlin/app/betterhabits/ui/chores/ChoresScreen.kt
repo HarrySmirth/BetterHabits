@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AutoFixHigh
-import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -32,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.betterhabits.R
 import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.components.EmptyState
+import app.betterhabits.ui.components.FrogMood
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
 import app.betterhabits.ui.components.SyncStatusBanner
@@ -89,7 +89,7 @@ fun ChoresScreen(
             state.loading -> LoadingState(Modifier.padding(padding))
             state.context == null -> ErrorState(state.loadError ?: return@TopLevelScaffold, onRetry = viewModel::refresh, modifier = Modifier.padding(padding))
             state.active.isEmpty() && state.paused.isEmpty() -> EmptyState(
-                icon = Icons.Outlined.CleaningServices,
+                frog = FrogMood.HAPPY,
                 title = stringResource(R.string.chores_empty_title),
                 body = stringResource(if (state.canCreate) R.string.chores_empty_body else R.string.chores_empty_body_readonly),
                 modifier = Modifier.padding(padding),
