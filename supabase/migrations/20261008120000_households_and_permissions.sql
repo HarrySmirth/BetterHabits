@@ -94,6 +94,20 @@ $$;
 create trigger on_auth_user_created after insert on auth.users
     for each row execute function private.handle_new_user();
 
+-- Backfill profiles for any auth users created before this migration (e.g. dashboard invites).
+insert into public.profiles (id, display_name, is_child)
+select
+    u.id,
+    left(coalesce(
+        nullif(btrim(u.raw_user_meta_data ->> 'display_name'), ''),
+        nullif(btrim(u.raw_user_meta_data ->> 'full_name'), ''),
+        nullif(split_part(coalesce(u.email, ''), '@', 1), ''),
+        'Member'
+    ), 50),
+    coalesce((u.raw_app_meta_data ->> 'is_child')::boolean, false)
+from auth.users u
+on conflict (id) do nothing;
+
 -- ---------------------------------------------------------------------------------------------
 -- Households and membership
 -- ---------------------------------------------------------------------------------------------
