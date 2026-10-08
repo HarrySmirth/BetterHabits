@@ -4,6 +4,7 @@ import app.betterhabits.data.chore.ChoreDto
 import app.betterhabits.data.chore.OccurrenceDto
 import app.betterhabits.data.household.parseTimestamp
 import app.betterhabits.data.remote.backendCall
+import app.betterhabits.data.remote.requireSession
 import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.AppException
 import io.github.jan.supabase.SupabaseClient
@@ -16,7 +17,7 @@ import java.time.LocalDate
 /** PostgREST implementation of [ChoreRemote]. All rules are enforced server-side (RLS + triggers). */
 class SupabaseChoreRemote(private val client: SupabaseClient?) : ChoreRemote {
 
-    private fun db(): SupabaseClient = client ?: throw AppException(AppError.NotConfigured)
+    private suspend fun db(): SupabaseClient = (client ?: throw AppException(AppError.NotConfigured)).requireSession()
 
     override suspend fun pullChores(householdId: String, since: String?): List<ChoreDto> = paged { from, to ->
         db().from("chores").select {

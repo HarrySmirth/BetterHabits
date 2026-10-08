@@ -1,6 +1,7 @@
 package app.betterhabits.data.household
 
 import app.betterhabits.data.remote.backendCall
+import app.betterhabits.data.remote.requireSession
 import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.AppException
 import app.betterhabits.domain.model.ChildAccountCredentials
@@ -32,7 +33,7 @@ class SupabaseHouseholdRepository(private val client: SupabaseClient?) : Househo
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private fun db(): SupabaseClient = client ?: throw AppException(AppError.NotConfigured)
+    private suspend fun db(): SupabaseClient = (client ?: throw AppException(AppError.NotConfigured)).requireSession()
 
     private suspend fun rpc(function: String, params: JsonObject = JsonObject(emptyMap())) =
         db().postgrest.rpc(function, params)

@@ -6,6 +6,7 @@ import androidx.room.Room
 import app.betterhabits.BuildConfig
 import app.betterhabits.data.auth.AuthRepository
 import app.betterhabits.data.auth.AuthState
+import app.betterhabits.data.auth.DataStoreLastUserStore
 import app.betterhabits.data.auth.SupabaseAuthRepository
 import app.betterhabits.data.chore.ChoreRepository
 import app.betterhabits.data.chore.OfflineChoreRepository
@@ -84,11 +85,11 @@ class DefaultAppContainer(context: Context) : AppContainer {
     }
 
     override val authRepository: AuthRepository by lazy {
-        SupabaseAuthRepository(supabase, BuildConfig.CHILD_EMAIL_DOMAIN)
+        SupabaseAuthRepository(supabase, BuildConfig.CHILD_EMAIL_DOMAIN, DataStoreLastUserStore(appContext.userPreferencesDataStore))
     }
 
     override val householdRepository: HouseholdRepository by lazy {
-        CachingHouseholdRepository(SupabaseHouseholdRepository(supabase), database.cacheDao())
+        CachingHouseholdRepository(SupabaseHouseholdRepository(supabase), database.cacheDao(), isOnline = { online.value })
     }
 
     override val profileRepository: ProfileRepository by lazy { SupabaseProfileRepository(supabase) }
@@ -142,6 +143,7 @@ class DefaultAppContainer(context: Context) : AppContainer {
                 if (household != null) syncEngine.requestSync(household)
             }
             .launchIn(applicationScope)
+        if (BuildConfig.DEBUG) online.onEach { android.util.Log.d("BH", "online=$it") }.launchIn(applicationScope)
         // Back online: send anything queued and catch up.
         online.filter { it }.onEach {
             applicationScope.launch {

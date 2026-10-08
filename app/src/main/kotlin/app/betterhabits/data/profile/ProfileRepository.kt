@@ -1,6 +1,7 @@
 package app.betterhabits.data.profile
 
 import app.betterhabits.data.remote.backendCall
+import app.betterhabits.data.remote.requireSession
 import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.AppException
 import app.betterhabits.domain.model.Profile
@@ -28,7 +29,7 @@ private data class ProfileDto(
 
 class SupabaseProfileRepository(private val client: SupabaseClient?) : ProfileRepository {
 
-    private fun db(): SupabaseClient = client ?: throw AppException(AppError.NotConfigured)
+    private suspend fun db(): SupabaseClient = (client ?: throw AppException(AppError.NotConfigured)).requireSession()
 
     override suspend fun profile(userId: String) = backendCall {
         val dto = db().from("profiles").select { filter { eq("id", userId) } }.decodeSingle<ProfileDto>()

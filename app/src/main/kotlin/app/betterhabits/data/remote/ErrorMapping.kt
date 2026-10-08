@@ -6,6 +6,7 @@ import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.AppException
 import io.github.jan.supabase.auth.exception.AuthErrorCode
 import io.github.jan.supabase.auth.exception.AuthRestException
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.postgrest.exception.PostgrestRestException
@@ -59,7 +60,12 @@ fun Throwable.toAppError(): AppError = when (this) {
         else -> AppError.Unknown(this)
     }
     is PostgrestRestException -> fromText(listOfNotNull(message, error, description, hint, details?.toString()).joinToString(" "))
-        ?: if (code == "42501") AppError.PermissionDenied else AppError.Unknown(this)
+        ?: when {
+            code == "42501" -> AppError.PermissionDenied
+            // Expired or invalid JWT (PGRST301/302): temporary until the session refreshes.
+            statusCode == 401 -> AppError.SessionExpired
+            else -> AppError.Unknown(this)
+        }
     is RestException -> fromText(listOfNotNull(message, error, description).joinToString(" "))
         ?: when (statusCode) {
             401 -> AppError.SessionExpired
@@ -73,3 +79,18 @@ fun Throwable.toAppError(): AppError = when (this) {
 
 private fun fromText(text: String): AppError? =
     messageKeys.firstOrNull { (key, _) -> text.contains(key) }?.second?.invoke(text)
+
+/**
+ * Waits until Supabase has a confirmed session before a data request. Without one, requests
+ * would go out with the anonymous key and be refused as "permission denied", which sync would
+ * mistake for a real rejection. A missing session is reported as [AppError.SessionExpired],
+ * which callers treat as temporary (queued changes are kept and retried).
+ */
+suspend fun io.github.jan.supabase.SupabaseClient.requireSession(): io.github.jan.supabase.SupabaseClient {
+    // Offline, the SDK can stay "initialising" while it retries a refresh; don't wait forever.
+    kotlinx.coroutines.withTimeoutOrNull(SESSION_WAIT_MS) { auth.awaitInitialization() }
+    if (auth.currentSessionOrNull() == null) throw AppException(AppError.SessionExpired)
+    return this
+}
+
+private const val SESSION_WAIT_MS = 5_000L

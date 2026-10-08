@@ -3,6 +3,7 @@ package app.betterhabits.data.household
 import app.betterhabits.data.local.CacheDao
 import app.betterhabits.data.local.CacheEntity
 import app.betterhabits.domain.error.AppError
+import app.betterhabits.domain.error.AppException
 import app.betterhabits.domain.error.appError
 import app.betterhabits.domain.model.Household
 import app.betterhabits.domain.model.HouseholdDetails
@@ -10,39 +11,54 @@ import app.betterhabits.domain.model.HouseholdMember
 import app.betterhabits.domain.model.HouseholdSummary
 import app.betterhabits.domain.model.PermissionOverride
 import kotlinx.serialization.Serializable
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import java.time.Instant
 
 /**
- * Remembers the household list and details so the app opens and works offline. Reads go to the
- * server first; only when the server can't be reached is the last known copy used. Membership
- * changes are not cached or queued: they must be checked by the server.
+ * Remembers the household list and details so the app opens and works offline. Online, reads go
+ * to the server (giving up after [REMOTE_TIMEOUT_MS]) and refresh the cache; offline, or when the
+ * server can't be reached or the session isn't ready, the last known copy is used straight away.
+ * Membership changes are not cached or queued: they must be checked by the server.
  */
 class CachingHouseholdRepository(
     private val remote: HouseholdRepository,
     private val cache: CacheDao,
+    private val isOnline: () -> Boolean,
 ) : HouseholdRepository by remote {
 
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun myHouseholds(userId: String): Result<List<HouseholdSummary>> {
         val key = "households:$userId"
-        return remote.myHouseholds(userId)
+        cachedFirstIfOffline { cache.get(key)?.let { json.decodeFromString<List<CachedSummary>>(it).map(CachedSummary::toDomain) } }?.let { return Result.success(it) }
+        return withTimeoutOrRemoteError { remote.myHouseholds(userId) }
             .onSuccess { list -> cache.put(CacheEntity(key, json.encodeToString(list.map(CachedSummary::from)))) }
             .recoverOffline { cache.get(key)?.let { json.decodeFromString<List<CachedSummary>>(it).map(CachedSummary::toDomain) } }
     }
 
     override suspend fun details(householdId: String, currentUserId: String): Result<HouseholdDetails> {
         val key = "household:$currentUserId:$householdId"
-        return remote.details(householdId, currentUserId)
+        cachedFirstIfOffline { cache.get(key)?.let { json.decodeFromString<CachedDetails>(it).toDomain(currentUserId) } }?.let { return Result.success(it) }
+        return withTimeoutOrRemoteError { remote.details(householdId, currentUserId) }
             .onSuccess { cache.put(CacheEntity(key, json.encodeToString(CachedDetails.from(it)))) }
             .recoverOffline { cache.get(key)?.let { json.decodeFromString<CachedDetails>(it).toDomain(currentUserId) } }
     }
 
+    private inline fun <T> cachedFirstIfOffline(cached: () -> T?): T? = if (isOnline()) null else cached()
+
+    private suspend fun <T> withTimeoutOrRemoteError(call: suspend () -> Result<T>): Result<T> =
+        withTimeoutOrNull(REMOTE_TIMEOUT_MS) { call() } ?: Result.failure(AppException(AppError.Network))
+
+    /** Falls back to the cached copy when the server can't be reached or the session isn't ready yet. */
     private inline fun <T> Result<T>.recoverOffline(cached: () -> T?): Result<T> {
         val error = exceptionOrNull() ?: return this
-        if (error.appError != AppError.Network) return this
+        if (error.appError != AppError.Network && error.appError != AppError.SessionExpired) return this
         return cached()?.let { Result.success(it) } ?: this
+    }
+
+    private companion object {
+        const val REMOTE_TIMEOUT_MS = 4_000L
     }
 }
 

@@ -16,32 +16,62 @@ import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.functions.functions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+/** What the Supabase session status means for us, independent of the SDK's types (for testing). */
+internal sealed interface SessionSignal {
+    /** Loading the stored session, or refreshing it before reporting (can last a while offline). */
+    data object Initializing : SessionSignal
+    data class Authenticated(val user: AuthUser?) : SessionSignal
+    /** The access token expired and couldn't be refreshed: almost always "offline". */
+    data object RefreshFailed : SessionSignal
+    /** No session, an explicit sign-out, or a session the server revoked. */
+    data object NotAuthenticated : SessionSignal
+}
+
+/**
+ * Offline-first sign-in state. Only a real sign-out (or revoked session) signs the user out:
+ * being offline, even with an expired token, keeps the last signed-in user, because signing out
+ * wipes the local data. Without a remembered user, startup waits for Supabase as before.
+ */
+internal fun resolveAuthState(signal: SessionSignal, lastUser: AuthUser?): AuthState = when (signal) {
+    SessionSignal.Initializing -> lastUser?.let(AuthState::SignedIn) ?: AuthState.Loading
+    is SessionSignal.Authenticated -> signal.user?.let(AuthState::SignedIn) ?: lastUser?.let(AuthState::SignedIn) ?: AuthState.Loading
+    SessionSignal.RefreshFailed -> lastUser?.let(AuthState::SignedIn) ?: AuthState.Loading
+    SessionSignal.NotAuthenticated -> AuthState.SignedOut
+}
+
 class SupabaseAuthRepository(
     private val client: SupabaseClient?,
     private val childEmailDomain: String,
+    private val lastUserStore: LastUserStore,
 ) : AuthRepository {
 
-    override val authState: Flow<AuthState> = client?.auth?.sessionStatus
-        ?.map { status ->
-            when (status) {
-                is SessionStatus.Initializing -> AuthState.Loading
-                is SessionStatus.Authenticated -> status.session.user?.toAuthUser()?.let(AuthState::SignedIn)
-                    ?: AuthState.SignedOut
-                // Token refresh failed (typically offline): keep the stored session so the app stays usable.
-                is SessionStatus.RefreshFailure -> client.auth.currentUserOrNull()?.toAuthUser()?.let(AuthState::SignedIn)
-                    ?: AuthState.SignedOut
-                is SessionStatus.NotAuthenticated -> AuthState.SignedOut
+    override val authState: Flow<AuthState> = client?.auth?.sessionStatus?.let { statuses ->
+        flow {
+            var lastUser = lastUserStore.get()
+            statuses.collect { status ->
+                val signal = when (status) {
+                    is SessionStatus.Initializing -> SessionSignal.Initializing
+                    is SessionStatus.Authenticated -> SessionSignal.Authenticated(status.session.user?.toAuthUser())
+                    is SessionStatus.RefreshFailure -> SessionSignal.RefreshFailed
+                    is SessionStatus.NotAuthenticated -> SessionSignal.NotAuthenticated
+                }
+                val state = resolveAuthState(signal, lastUser)
+                val remembered = (state as? AuthState.SignedIn)?.user
+                if (remembered != lastUser && (remembered != null || state == AuthState.SignedOut)) {
+                    lastUser = remembered
+                    lastUserStore.set(remembered)
+                }
+                emit(state)
             }
-        }
-        ?.distinctUntilChanged()
-        ?: flowOf(AuthState.NotConfigured)
+        }.distinctUntilChanged()
+    } ?: flowOf(AuthState.NotConfigured)
 
     private fun UserInfo.toAuthUser(): AuthUser {
         val isChild = appMetadata?.get("is_child")?.jsonPrimitive?.booleanOrNull == true ||
