@@ -9,17 +9,221 @@
     <string name="nav_household">Household</string>
     <string name="nav_profile">Profile</string>
 
-    <!-- Empty states (Phase 0 shell: these screens have no data sources yet) -->
+    <!-- Empty states (screens whose features arrive in later phases) -->
     <string name="today_empty_title">Nothing scheduled today</string>
     <string name="today_empty_body">Chores and habits due today will appear here.</string>
     <string name="chores_empty_title">No chores yet</string>
     <string name="chores_empty_body">Household chores will be listed here once your household is set up.</string>
     <string name="habits_empty_title">No habits yet</string>
     <string name="habits_empty_body">Personal habits you track will appear here.</string>
-    <string name="household_empty_title">No household yet</string>
-    <string name="household_empty_body">Members, templates, workload balance and activity will live here.</string>
 
-    <!-- Profile / appearance -->
+    <!-- Generic actions -->
+    <string name="action_cancel">Cancel</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_save">Save</string>
+    <string name="action_done">Done</string>
+    <string name="action_create">Create</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_revoke">Revoke</string>
+    <string name="action_share">Share</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_join">Join</string>
+    <string name="action_decline">Decline</string>
+    <string name="action_leave">Leave</string>
+    <string name="action_transfer">Transfer</string>
+    <string name="label_or">or</string>
+
+    <!-- Accessibility -->
+    <string name="cd_back">Back</string>
+    <string name="cd_show_password">Show password</string>
+    <string name="cd_hide_password">Hide password</string>
+    <string name="cd_more_options">More options</string>
+    <string name="cd_switch_household">Switch household</string>
+    <string name="cd_edit_name">Edit name</string>
+
+    <!-- Form fields and validation -->
+    <string name="field_email">Email</string>
+    <string name="field_password">Password</string>
+    <string name="field_new_password">New password</string>
+    <string name="field_your_name">Your name</string>
+    <string name="field_code">6-digit code</string>
+    <string name="field_username">Username</string>
+    <string name="field_pin">PIN or password</string>
+    <string name="field_new_pin">New PIN or password</string>
+    <string name="field_child_name">Child\'s name</string>
+    <string name="field_household_name">Household name</string>
+    <string name="field_household_name_hint">e.g. Harry &amp; Sarah</string>
+    <string name="field_invite_code">Invite code</string>
+    <string name="validation_email">Enter a valid email address</string>
+    <string name="validation_name">Enter a name</string>
+    <plurals name="validation_password">
+        <item quantity="one">At least %1$d character</item>
+        <item quantity="other">At least %1$d characters</item>
+    </plurals>
+    <string name="validation_pin">At least 6 characters. Numbers are fine.</string>
+
+    <!-- Errors: plain language, no technical detail -->
+    <string name="error_title">Something went wrong</string>
+    <string name="error_network">You appear to be offline. Check your connection and try again.</string>
+    <string name="error_not_configured">This build isn\'t connected to a server.</string>
+    <string name="error_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_invalid_credentials">That email and password don\'t match.</string>
+    <string name="error_email_not_confirmed">Please confirm your email address first.</string>
+    <string name="error_email_registered">An account with this email already exists. Try signing in.</string>
+    <string name="error_weak_password">That password is too short or too easy to guess.</string>
+    <string name="error_invalid_code">That code is incorrect or has expired.</string>
+    <string name="error_rate_limited">Too many attempts. Please wait a while and try again.</string>
+    <string name="error_permission_denied">You don\'t have permission to do that.</string>
+    <string name="error_invite_invalid">That invite code isn\'t valid. Check it and try again.</string>
+    <string name="error_invite_expired">That invite code has expired. Ask for a new one.</string>
+    <string name="error_invitation_not_found">This invitation is no longer available.</string>
+    <string name="error_invitation_expired">This invitation has expired. Ask for a new one.</string>
+    <string name="error_already_member">They\'re already a member of this household.</string>
+    <string name="error_children_not_allowed">Child accounts can\'t do that.</string>
+    <string name="error_transfer_ownership">Transfer ownership to another member first.</string>
+    <string name="error_transfer_ownership_named">Transfer ownership of %1$s to another member first.</string>
+    <string name="error_google_cancelled">Google sign-in was cancelled.</string>
+    <string name="error_google_unavailable">Google sign-in isn\'t available on this device right now.</string>
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="not_configured_title">Not connected</string>
+    <string name="not_configured_body">This build has no server configuration. Add your Supabase details to secrets.properties and rebuild.</string>
+
+    <!-- Sign in / sign up -->
+    <string name="sign_in_title">Welcome</string>
+    <string name="sign_in_subtitle">Share the housework fairly, and build better habits.</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="action_forgot_password">Forgot password?</string>
+    <string name="action_create_account">Create an account</string>
+    <string name="action_child_sign_in">Child sign-in</string>
+    <string name="action_continue_google">Continue with Google</string>
+    <string name="sign_up_title">Create your account</string>
+    <string name="sign_up_subtitle">You\'ll be able to create or join a household next.</string>
+    <string name="verify_title">Check your email</string>
+    <string name="verify_subtitle">Enter the 6-digit code we sent to %1$s.</string>
+    <string name="action_verify">Verify</string>
+    <string name="action_resend_code">Send a new code</string>
+    <string name="verify_resent">New code sent</string>
+    <string name="forgot_title">Reset your password</string>
+    <string name="forgot_subtitle">We\'ll email you a code to choose a new password.</string>
+    <string name="action_send_code">Send code</string>
+    <string name="reset_title">Choose a new password</string>
+    <string name="action_reset_password">Reset password</string>
+    <string name="child_sign_in_title">Child sign-in</string>
+    <string name="child_sign_in_subtitle">Use the username and PIN a parent set up for you.</string>
+
+    <!-- Household setup -->
+    <string name="setup_title">Set up your household</string>
+    <string name="setup_title_add">Add a household</string>
+    <string name="setup_intro">Create a household for the people you live with, or join one you\'ve been invited to.</string>
+    <string name="setup_create_title">Create a household</string>
+    <string name="setup_create_body">You\'ll be the owner and can invite others.</string>
+    <string name="action_create_household">Create household</string>
+    <string name="setup_join_title">Join with an invite code</string>
+    <string name="setup_join_body">Ask a household member for their 8-character code.</string>
+    <string name="setup_child_title">Waiting to be added</string>
+    <string name="setup_child_body">Ask a parent to add you to your household.</string>
+    <string name="invitation_from">%1$s invited you to join %2$s</string>
+    <string name="invitation_to">You\'re invited to join %1$s</string>
+    <string name="invitation_role">You\'ll join as: %1$s</string>
+
+    <!-- Household -->
+    <string name="household_members">Members (%1$d)</string>
+    <string name="household_invite_codes">Active invite codes</string>
+    <string name="household_pending_invitations">Pending invitations</string>
+    <string name="household_settings">Household settings</string>
+    <string name="member_you">%1$s (you)</string>
+    <string name="action_add_household">Create or join another household</string>
+    <string name="action_create_invite_code">Invite code</string>
+    <string name="action_invite_by_email">Invite by email</string>
+    <string name="action_add_child">Add a child</string>
+    <string name="action_leave_household">Leave household</string>
+    <string name="invite_code_expires">Expires %1$s</string>
+    <string name="invite_share_text">Join our household \"%1$s\" on BetterHabits with invite code %2$s</string>
+    <string name="revoke_code_title">Revoke this code?</string>
+    <string name="revoke_code_body">Nobody will be able to join with it any more. People who already joined stay members.</string>
+    <string name="invitation_pending_detail">%1$s · expires %2$s</string>
+    <string name="invite_email_title">Invite by email</string>
+    <string name="invite_email_body">They\'ll see the invitation when they sign in to BetterHabits with this email address. No email is sent, so let them know.</string>
+    <string name="action_send_invite">Invite</string>
+    <string name="add_child_title">Add a child</string>
+    <string name="add_child_body">Children get their own sign-in without an email address. You choose their PIN.</string>
+    <string name="child_created_title">%1$s has been added</string>
+    <string name="child_created_body">On their device, choose \"Child sign-in\" and enter this username with the PIN you chose:</string>
+    <string name="child_created_pin_note">You can reset their PIN from their member page at any time.</string>
+    <string name="leave_title">Leave %1$s?</string>
+    <string name="leave_body">You\'ll lose access to this household\'s chores and history. Someone will need to invite you again to rejoin.</string>
+    <string name="leave_body_last">You\'re the only member, so the household and all its data will be deleted.</string>
+
+    <!-- Member detail -->
+    <string name="member_child_account">Child account</string>
+    <string name="member_role">Role</string>
+    <string name="member_permissions">Permissions</string>
+    <string name="member_permissions_help">\"Default\" follows the %1$s role\'s settings for this household.</string>
+    <string name="member_actions">Manage</string>
+    <string name="member_permissions_hide">Hide permission details</string>
+    <string name="member_permissions_customise_none">Customise permissions</string>
+    <plurals name="member_permissions_customise">
+        <item quantity="one">Customise permissions (%1$d change)</item>
+        <item quantity="other">Customise permissions (%1$d changes)</item>
+    </plurals>
+    <string name="override_default_on">Default (on)</string>
+    <string name="override_default_off">Default (off)</string>
+    <string name="override_allow">Allow</string>
+    <string name="override_deny">Deny</string>
+    <string name="action_reset_pin">Reset PIN</string>
+    <string name="action_transfer_ownership">Make owner</string>
+    <string name="action_remove_member">Remove from household</string>
+    <string name="action_delete_child_account">Delete child account</string>
+    <string name="remove_member_title">Remove %1$s?</string>
+    <string name="remove_member_body">%1$s will lose access to this household. Their past activity stays in the history.</string>
+    <string name="transfer_title">Make %1$s the owner?</string>
+    <string name="transfer_body">%1$s will become the owner and you\'ll become an admin. Only the new owner can undo this.</string>
+    <string name="delete_child_title">Delete %1$s\'s account?</string>
+    <string name="delete_child_body">%1$s will be signed out and their account permanently deleted. This can\'t be undone.</string>
+    <string name="reset_pin_title">New PIN for %1$s</string>
+    <string name="pin_reset_done">%1$s\'s PIN has been changed. They\'ll need the new one next time they sign in.</string>
+
+    <!-- Roles & permissions -->
+    <string name="role_owner">Owner</string>
+    <string name="role_admin">Admin</string>
+    <string name="role_member">Member</string>
+    <string name="role_child">Child</string>
+    <string name="role_owner_description">Full control, including deleting the household</string>
+    <string name="role_admin_description">Manages members, settings and permissions</string>
+    <string name="role_member_description">Shares chores; permissions set by the household</string>
+    <string name="role_child_description">Does their own chores and habits</string>
+    <string name="permission_create_chores">Create chores</string>
+    <string name="permission_edit_chores">Edit chores</string>
+    <string name="permission_delete_chores">Delete chores</string>
+    <string name="permission_assign_chores">Assign chores</string>
+    <string name="permission_manage_templates">Manage templates</string>
+    <string name="permission_manage_settings">Manage household settings</string>
+    <string name="permission_invite_members">Invite members</string>
+    <string name="permission_remove_members">Remove members</string>
+    <string name="permission_manage_children">Manage child accounts</string>
+    <string name="permission_configure_allocation">Configure chore allocation</string>
+
+    <!-- Household settings -->
+    <string name="settings_general">General</string>
+    <string name="settings_role_permissions">What a %1$s can do</string>
+    <string name="settings_role_readonly">Only the owner can change these.</string>
+    <string name="settings_danger_zone">Delete household</string>
+    <string name="settings_delete_household_body">Permanently deletes this household for everyone, including its chores and history.</string>
+    <string name="action_delete_household">Delete household</string>
+    <string name="delete_household_title">Delete %1$s?</string>
+    <string name="delete_household_body">Everyone will lose access and all of its data will be permanently deleted. This can\'t be undone.</string>
+
+    <!-- Profile -->
+    <string name="profile_account">Account</string>
+    <string name="profile_child_account">Child account</string>
+    <string name="edit_name_title">Your name</string>
+    <string name="sign_out_title">Sign out?</string>
+    <string name="sign_out_body">You can sign back in at any time.</string>
+    <string name="action_delete_account">Delete account</string>
+    <string name="delete_account_title">Delete your account?</string>
+    <string name="delete_account_body">Your account will be permanently deleted. Households where you\'re the only member are deleted too. If you own a shared household, make someone else the owner first.</string>
     <string name="profile_appearance">Appearance</string>
     <string name="profile_theme">Theme</string>
     <string name="theme_system">System default</string>

@@ -16,13 +16,13 @@ Most chore apps ask *"who is assigned this?"*. BetterHabits aims to answer *"giv
 - Optional gamification (points, badges, rewards)
 
 ## Status
-**Early development. Not usable yet.** Phase 0 is done: the app shell, theme, navigation, test setup and CI. Next up is Phase 1: accounts, households and permissions.
+**Early development.** Phase 1 is implemented and tested: accounts, households, roles and permissions, invite codes, email invitations and child accounts. Its database migrations haven't been deployed to the hosted Supabase project yet. Chores arrive in Phase 2.
 
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | Project foundation, CI, release pipeline | ✅ |
-| 1 | Auth, households, roles, invites, RLS | ⏳ |
-| 2 | Chores, recurrence, completion, history | |
+| 1 | Auth, households, roles, invites, RLS | ✅ (deploy pending) |
+| 2 | Chores, recurrence, completion, history | ⏳ |
 | 3 | Offline cache, sync, realtime | |
 | 4 | Preferences, fairness, smart allocation | |
 | 5 | Templates | |

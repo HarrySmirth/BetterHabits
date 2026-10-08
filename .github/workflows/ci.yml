@@ -30,6 +30,10 @@ jobs:
       - name: Unit tests
         run: ./gradlew :domain:test testDebugUnitTest --stacktrace
 
+      # Applies supabase/migrations to an embedded Postgres 17 and tests RLS policies and RPCs.
+      - name: Database (RLS) tests
+        run: ./gradlew :supabase-tests:test
+
       - name: Android lint
         run: ./gradlew lintDebug
 

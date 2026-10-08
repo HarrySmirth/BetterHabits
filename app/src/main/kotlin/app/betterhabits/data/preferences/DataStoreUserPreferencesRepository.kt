@@ -24,8 +24,13 @@ class DataStoreUserPreferencesRepository(
                     ?.let { stored -> ThemeMode.entries.firstOrNull { it.name == stored } }
                     ?: ThemeMode.SYSTEM,
                 useDynamicColor = prefs[DYNAMIC_COLOR] ?: true,
+                selectedHouseholdId = prefs[SELECTED_HOUSEHOLD],
             )
         }
+
+    override suspend fun setSelectedHouseholdId(id: String?) {
+        dataStore.edit { if (id == null) it.remove(SELECTED_HOUSEHOLD) else it[SELECTED_HOUSEHOLD] = id }
+    }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
         dataStore.edit { it[THEME_MODE] = mode.name }
@@ -38,5 +43,6 @@ class DataStoreUserPreferencesRepository(
     private companion object {
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val SELECTED_HOUSEHOLD = stringPreferencesKey("selected_household_id")
     }
 }

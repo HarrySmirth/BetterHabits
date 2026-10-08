@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.betterhabits.ui.AppViewModelFactory
-import app.betterhabits.ui.BetterHabitsApp
+import app.betterhabits.ui.BetterHabitsRoot
 import app.betterhabits.ui.theme.BetterHabitsTheme
 import app.betterhabits.ui.theme.isDarkTheme
 
@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                 darkTheme = isDarkTheme(ready.preferences.themeMode),
                 dynamicColor = ready.preferences.useDynamicColor,
             ) {
-                BetterHabitsApp()
+                BetterHabitsRoot(session = ready.session, onRetry = viewModel::retry, onSignOut = viewModel::signOut)
             }
         }
     }

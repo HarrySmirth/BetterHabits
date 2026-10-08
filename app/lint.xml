@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="NewerVersionAvailable">
+        <!-- Pinned to the Ktor version supabase-kt is built against (see libs.versions.toml). -->
+        <ignore regexp="io\.ktor:ktor-client-okhttp" />
+        <!-- Pinned to Postgres 17 to match the Supabase project's major version. -->
+        <ignore regexp="embedded-postgres-binaries-bom" />
+    </issue>
+</lint>

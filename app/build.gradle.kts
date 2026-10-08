@@ -40,7 +40,8 @@ android {
         versionCode = appVersionCode
         versionName = appVersion
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Starts the app with in-memory fakes so UI tests never touch a real backend.
+        testInstrumentationRunner = "app.betterhabits.BetterHabitsTestRunner"
 
         // Client-safe values only (project URL + publishable key). Security relies on RLS, never on
         // hiding these. Empty values make the app show a "not configured" state instead of crashing.
@@ -51,6 +52,14 @@ android {
             "\"${config(secrets, "supabase.publishableKey", "SUPABASE_PUBLISHABLE_KEY").orEmpty()}\"",
         )
         buildConfigField("String", "GITHUB_REPOSITORY", "\"${providers.gradleProperty("betterhabits.githubRepository").get()}\"")
+        // OAuth *web* client ID (public). Empty hides the Google sign-in button.
+        buildConfigField(
+            "String",
+            "GOOGLE_WEB_CLIENT_ID",
+            "\"${config(secrets, "google.webClientId", "GOOGLE_WEB_CLIENT_ID").orEmpty()}\"",
+        )
+        // Must match CHILD_EMAIL_DOMAIN used by the child-accounts Edge Function.
+        buildConfigField("String", "CHILD_EMAIL_DOMAIN", "\"${providers.gradleProperty("betterhabits.childEmailDomain").get()}\"")
     }
 
     // Release signing: keystore.properties locally, or environment variables in GitHub Actions.
@@ -93,6 +102,12 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+
+    // Fakes shared by JVM unit tests and instrumented UI tests.
+    sourceSets {
+        getByName("test").kotlin.directories.add("src/sharedTest/kotlin")
+        getByName("androidTest").kotlin.directories.add("src/sharedTest/kotlin")
+    }
 }
 
 dependencies {
@@ -106,6 +121,18 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+
+    // Backend: Supabase auth, PostgREST and Edge Functions over Ktor/OkHttp.
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.functions)
+    implementation(libs.ktor.client.okhttp)
+
+    // Google sign-in via Android Credential Manager (ID token handed to Supabase).
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

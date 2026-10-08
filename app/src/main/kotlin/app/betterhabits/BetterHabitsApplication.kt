@@ -1,16 +1,20 @@
 package app.betterhabits
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import app.betterhabits.di.AppContainer
 import app.betterhabits.di.DefaultAppContainer
 
-class BetterHabitsApplication : Application() {
+open class BetterHabitsApplication : Application() {
 
     lateinit var container: AppContainer
-        private set
+        @VisibleForTesting internal set
 
     override fun onCreate() {
         super.onCreate()
-        container = DefaultAppContainer(this)
+        container = createContainer()
     }
+
+    /** Instrumented tests override this to run the real UI against fake repositories. */
+    protected open fun createContainer(): AppContainer = DefaultAppContainer(this)
 }

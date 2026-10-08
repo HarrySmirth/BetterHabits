@@ -22,37 +22,48 @@ import androidx.navigation.compose.rememberNavController
 import app.betterhabits.ui.chores.ChoresScreen
 import app.betterhabits.ui.habits.HabitsScreen
 import app.betterhabits.ui.household.HouseholdScreen
+import app.betterhabits.ui.household.HouseholdSettingsScreen
+import app.betterhabits.ui.household.HouseholdSetupScreen
+import app.betterhabits.ui.household.MemberDetailScreen
 import app.betterhabits.ui.navigation.ChoresRoute
 import app.betterhabits.ui.navigation.HabitsRoute
 import app.betterhabits.ui.navigation.HouseholdRoute
+import app.betterhabits.ui.navigation.HouseholdSettingsRoute
+import app.betterhabits.ui.navigation.HouseholdSetupRoute
+import app.betterhabits.ui.navigation.MemberDetailRoute
 import app.betterhabits.ui.navigation.ProfileRoute
 import app.betterhabits.ui.navigation.TodayRoute
 import app.betterhabits.ui.navigation.TopLevelDestination
 import app.betterhabits.ui.profile.ProfileScreen
 import app.betterhabits.ui.today.TodayScreen
 
+/** Main signed-in shell: bottom navigation between top-level tabs plus nested screens. */
 @Composable
 fun BetterHabitsApp(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
+    val showBottomBar = currentDestination == null ||
+        TopLevelDestination.entries.any { dest -> currentDestination.hierarchy.any { it.hasRoute(dest.routeClass) } }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                TopLevelDestination.entries.forEach { destination ->
-                    val selected = currentDestination?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = { navController.navigateToTopLevel(destination) },
-                        icon = {
-                            Icon(
-                                imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
-                                // The label below already names the item for screen readers.
-                                contentDescription = null,
-                            )
-                        },
-                        label = { Text(stringResource(destination.label)) },
-                    )
+            if (showBottomBar) {
+                NavigationBar {
+                    TopLevelDestination.entries.forEach { destination ->
+                        val selected = currentDestination?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = { navController.navigateToTopLevel(destination) },
+                            icon = {
+                                Icon(
+                                    imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                                    // The label below already names the item for screen readers.
+                                    contentDescription = null,
+                                )
+                            },
+                            label = { Text(stringResource(destination.label)) },
+                        )
+                    }
                 }
             }
         },
@@ -67,8 +78,17 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
             composable<TodayRoute> { TodayScreen() }
             composable<ChoresRoute> { ChoresScreen() }
             composable<HabitsRoute> { HabitsScreen() }
-            composable<HouseholdRoute> { HouseholdScreen() }
+            composable<HouseholdRoute> {
+                HouseholdScreen(
+                    onOpenMember = { householdId, userId -> navController.navigate(MemberDetailRoute(householdId, userId)) },
+                    onOpenSettings = { navController.navigate(HouseholdSettingsRoute(it)) },
+                    onAddHousehold = { navController.navigate(HouseholdSetupRoute) },
+                )
+            }
             composable<ProfileRoute> { ProfileScreen() }
+            composable<HouseholdSetupRoute> { HouseholdSetupScreen(onClose = navController::popBackStack) }
+            composable<MemberDetailRoute> { MemberDetailScreen(onBack = navController::popBackStack) }
+            composable<HouseholdSettingsRoute> { HouseholdSettingsScreen(onBack = navController::popBackStack) }
         }
     }
 }

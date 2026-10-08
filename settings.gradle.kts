@@ -24,3 +24,5 @@ rootProject.name = "BetterHabits"
 
 include(":app")
 include(":domain")
+include(":supabase-tests")
+project(":supabase-tests").projectDir = file("supabase/tests")

@@ -23,6 +23,11 @@ import kotlin.reflect.KClass
 @Serializable data object HouseholdRoute
 @Serializable data object ProfileRoute
 
+// Nested destinations (no bottom bar)
+@Serializable data object HouseholdSetupRoute
+@Serializable data class MemberDetailRoute(val householdId: String, val userId: String)
+@Serializable data class HouseholdSettingsRoute(val householdId: String)
+
 enum class TopLevelDestination(
     val route: Any,
     val routeClass: KClass<*>,

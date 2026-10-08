@@ -14,4 +14,6 @@ class FakeUserPreferencesRepository(initial: UserPreferences = UserPreferences()
     override suspend fun setThemeMode(mode: ThemeMode) = state.update { it.copy(themeMode = mode) }
 
     override suspend fun setUseDynamicColor(enabled: Boolean) = state.update { it.copy(useDynamicColor = enabled) }
+
+    override suspend fun setSelectedHouseholdId(id: String?) = state.update { it.copy(selectedHouseholdId = id) }
 }

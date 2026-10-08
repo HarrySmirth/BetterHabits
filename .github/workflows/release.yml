@@ -67,7 +67,7 @@ jobs:
           cache-read-only: true
 
       - name: Tests and lint
-        run: ./gradlew :domain:test testDebugUnitTest lintRelease
+        run: ./gradlew :domain:test testDebugUnitTest :supabase-tests:test lintRelease
 
       - name: Build signed release APK
         env:
@@ -77,6 +77,7 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
         run: ./gradlew assembleRelease
 
       - name: Verify signature and rename

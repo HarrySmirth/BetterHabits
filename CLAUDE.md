@@ -14,7 +14,8 @@ Kotlin 2.4 · Jetpack Compose + Material 3 · Navigation Compose (type-safe rout
 
 ## Commands (Windows: set `JAVA_HOME` to Android Studio's `jbr`; the PATH `java` is a JRE)
 ```
-./gradlew :domain:test testDebugUnitTest   # unit tests
+./gradlew :domain:test testDebugUnitTest   # unit tests (ViewModels use fakes in app/src/sharedTest)
+./gradlew :supabase-tests:test            # migrations + RLS/RPC tests on embedded Postgres 17 (no Docker)
 ./gradlew lintDebug                        # lint (must be clean: 0 errors/warnings)
 ./gradlew assembleDebug assembleRelease    # builds
 ./gradlew connectedDebugAndroidTest        # UI tests; emulator AVD: Medium_Phone_API_37.0
@@ -26,6 +27,10 @@ Before claiming done: unit tests + lint + assembleDebug pass, and UI tests run w
 - **Never** use the Supabase service-role/secret key in the app or repo. Privileged operations go in Edge Functions, with the key in Supabase function secrets.
 - Permissions are enforced by RLS. Client-side checks are UX only. Every new table gets RLS enabled, plus policies, in the same migration.
 - Child accounts are created by owners/admins via an Edge Function: an internal non-routable email plus a parent-set PIN. Children cannot self-register.
+- Auth uses typed 6-digit email codes (OTP) for sign-up confirmation and password reset, not deep links.
+- RPC errors: SQLSTATE 42501 = permission; P0001 + snake_case message key. Map new keys in data/remote/ErrorMapping.kt and give them friendly text in ui/components/Messages.kt.
+- `HouseholdSession` (data/household) is the app-wide signed-in state (user, households, selected household); screens observe it.
+- UI tests use `BetterHabitsTestRunner` + fakes; call `resetFakeContainer()` before launching MainActivity.
 
 ## Git conventions (user has authorised autonomous Git)
 - Commit, push, branch, merge, tag and release without asking. Work on `main` for small changes and use short-lived branches for large phases.
