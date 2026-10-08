@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Generic -->
+    <string name="action_edit">Edit</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_clear">Clear</string>
+    <string name="cd_remove">Remove %1$s</string>
+    <string name="filter_mine">Mine</string>
+    <string name="filter_everyone">Everyone</string>
+    <string name="member_former">a former member</string>
+    <string name="date_today">Today</string>
+    <string name="date_tomorrow">Tomorrow</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_with_time">%1$s, %2$s</string>
+
+    <!-- Durations -->
+    <string name="effort_minutes">%1$d min</string>
+    <string name="effort_hours">%1$d h</string>
+    <string name="effort_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- Schedules -->
+    <string name="schedule_once">Once, on %1$s</string>
+    <string name="schedule_daily">Every day</string>
+    <string name="schedule_weekly">Every %1$s</string>
+    <string name="schedule_monthly_day">Monthly on day %1$d</string>
+    <string name="schedule_monthly_weekday">Monthly on the %1$s %2$s</string>
+    <string name="schedule_yearly">Every year on %1$s</string>
+    <string name="schedule_at_times">%1$s at %2$s</string>
+    <plurals name="schedule_every_n_days">
+        <item quantity="one">Every day</item>
+        <item quantity="other">Every %1$d days</item>
+    </plurals>
+    <plurals name="schedule_every_n_weeks">
+        <item quantity="one">Every week on %2$s</item>
+        <item quantity="other">Every %1$d weeks on %2$s</item>
+    </plurals>
+    <plurals name="schedule_every_n_months_day">
+        <item quantity="one">Every month on day %2$d</item>
+        <item quantity="other">Every %1$d months on day %2$d</item>
+    </plurals>
+    <plurals name="schedule_every_n_months_weekday">
+        <item quantity="one">Every month on the %2$s %3$s</item>
+        <item quantity="other">Every %1$d months on the %2$s %3$s</item>
+    </plurals>
+    <plurals name="schedule_every_n_years">
+        <item quantity="one">Every year on %2$s</item>
+        <item quantity="other">Every %1$d years on %2$s</item>
+    </plurals>
+    <string-array name="week_ordinals">
+        <item>first</item>
+        <item>second</item>
+        <item>third</item>
+        <item>fourth</item>
+        <item>last</item>
+    </string-array>
+
+    <!-- Categories -->
+    <string name="category_kitchen">Kitchen</string>
+    <string name="category_bathroom">Bathroom</string>
+    <string name="category_living_areas">Living areas</string>
+    <string name="category_laundry">Laundry</string>
+    <string name="category_garden">Garden</string>
+    <string name="category_household">Household</string>
+    <string name="category_other">Other</string>
+
+    <!-- Today -->
+    <string name="today_empty_mine">Nothing is assigned to you today. Switch to Everyone to see the whole household.</string>
+    <string name="today_overdue">Overdue</string>
+    <string name="today_due">Due today</string>
+    <string name="today_done">Done</string>
+    <plurals name="today_progress">
+        <item quantity="one">%1$d of %2$d chore done</item>
+        <item quantity="other">%1$d of %2$d chores done</item>
+    </plurals>
+    <string name="today_remaining">About %1$s left</string>
+    <string name="today_marked_done">%1$s done</string>
+    <string name="today_updated">%1$s updated</string>
+    <string name="occurrence_overdue">Overdue: %1$s</string>
+    <string name="occurrence_due">Due: %1$s</string>
+    <string name="occurrence_done_by">Done by %1$s</string>
+    <string name="occurrence_skipped">Skipped</string>
+    <string name="state_done">Done</string>
+    <string name="state_not_done">Not done</string>
+    <string name="state_overdue">Overdue, not done</string>
+    <string name="state_skipped">Skipped</string>
+    <string name="cd_chore_options">More options for %1$s</string>
+    <string name="action_skip">Skip this time</string>
+    <string name="action_snooze_hour">Snooze 1 hour</string>
+    <string name="action_snooze_tomorrow">Snooze until tomorrow, 9:00</string>
+
+    <!-- Chores list & detail -->
+    <string name="action_add_chore">Add chore</string>
+    <string name="chores_empty_body_readonly">Chores added by your household will appear here.</string>
+    <string name="chores_paused">Paused</string>
+    <string name="chore_unassigned">Unassigned</string>
+    <string name="chore_next">Next: %1$s</string>
+    <string name="chore_assigned_to">Usually done by %1$s</string>
+    <string name="chore_paused_note">Paused: not appearing in anyone\'s list</string>
+    <string name="chore_upcoming">Upcoming</string>
+    <string name="chore_no_upcoming">No upcoming occurrences.</string>
+    <string name="chore_history">History</string>
+    <string name="chore_no_history">Not done yet.</string>
+    <string name="action_pause_chore">Pause chore</string>
+    <string name="action_resume_chore">Resume chore</string>
+    <string name="action_delete_chore">Delete chore</string>
+    <string name="delete_chore_title">Delete %1$s?</string>
+    <string name="delete_chore_body">It will disappear from everyone\'s lists. Past completions stay in the household history.</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <plurals name="history_window">
+        <item quantity="one">Last %1$d day</item>
+        <item quantity="other">Last %1$d days</item>
+    </plurals>
+    <string name="history_completed_by">Done by %1$s</string>
+    <string name="history_missed">Missed (%1$s)</string>
+    <string name="history_empty_title">No history yet</string>
+    <string name="history_empty_body">Completed, skipped and missed chores will show up here.</string>
+
+    <!-- Editor -->
+    <string name="editor_new_title">New chore</string>
+    <string name="editor_edit_title">Edit chore</string>
+    <string name="editor_q_what">What is it?</string>
+    <string name="editor_q_how_often">How often?</string>
+    <string name="editor_q_how_long">How long does it take?</string>
+    <string name="editor_q_who">Who should do it?</string>
+    <string name="field_chore_name">Chore</string>
+    <string name="field_chore_name_hint">e.g. Take the bins out</string>
+    <string name="repeat_once">Once</string>
+    <string name="repeat_daily">Daily</string>
+    <string name="repeat_weekly">Weekly</string>
+    <string name="repeat_monthly">Monthly</string>
+    <string name="repeat_yearly">Yearly</string>
+    <string name="editor_every">Every</string>
+    <plurals name="unit_days">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="unit_weeks">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="unit_months">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="unit_years">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <string name="editor_monthly_on_day">On day %1$d of the month</string>
+    <string name="editor_monthly_on_weekday">On the %1$s %2$s</string>
+    <string name="editor_starting">Starting</string>
+    <string name="editor_on_date">On</string>
+    <string name="validation_weekdays">Pick at least one day</string>
+    <string name="validation_end_date">The end date can\'t be before the start date</string>
+    <string name="editor_other_duration">Other</string>
+    <string name="field_minutes">Minutes</string>
+    <string name="editor_duration_help">A rough estimate is fine. It\'s used to share the work fairly.</string>
+    <string name="editor_more_options">More options</string>
+    <string name="editor_fewer_options">Fewer options</string>
+    <string name="editor_category">Category</string>
+    <string name="editor_due_times">Due times</string>
+    <string name="editor_due_times_help">Leave empty for \"any time that day\". Add several for chores done more than once a day.</string>
+    <string name="action_add_time">Add time</string>
+    <string name="editor_end_date">Ends</string>
+    <string name="editor_no_end_date">Never</string>
+    <string name="editor_difficulty">Difficulty</string>
+    <string name="editor_difficulty_value">Difficulty %1$d/5</string>
+    <string name="field_points">Points</string>
+    <string name="editor_points_help">Used if your household turns on points</string>
+    <string name="field_description">Description</string>
+    <string name="editor_checklist">Checklist</string>
+    <string name="field_checklist_item">Add a step</string>
+    <string name="action_add_item">Add step</string>
+    <string name="field_notes">Notes</string>
+</resources>

@@ -19,12 +19,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.betterhabits.ui.chores.ChoreDetailScreen
+import app.betterhabits.ui.chores.ChoreEditorScreen
 import app.betterhabits.ui.chores.ChoresScreen
+import app.betterhabits.ui.chores.HistoryScreen
 import app.betterhabits.ui.habits.HabitsScreen
 import app.betterhabits.ui.household.HouseholdScreen
 import app.betterhabits.ui.household.HouseholdSettingsScreen
 import app.betterhabits.ui.household.HouseholdSetupScreen
 import app.betterhabits.ui.household.MemberDetailScreen
+import app.betterhabits.ui.navigation.ChoreDetailRoute
+import app.betterhabits.ui.navigation.ChoreEditorRoute
+import app.betterhabits.ui.navigation.ChoreHistoryRoute
 import app.betterhabits.ui.navigation.ChoresRoute
 import app.betterhabits.ui.navigation.HabitsRoute
 import app.betterhabits.ui.navigation.HouseholdRoute
@@ -75,8 +81,19 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding),
         ) {
-            composable<TodayRoute> { TodayScreen() }
-            composable<ChoresRoute> { ChoresScreen() }
+            composable<TodayRoute> {
+                TodayScreen(
+                    onAddChore = { navController.navigate(ChoreEditorRoute()) },
+                    onOpenChore = { navController.navigate(ChoreDetailRoute(it)) },
+                )
+            }
+            composable<ChoresRoute> {
+                ChoresScreen(
+                    onAddChore = { navController.navigate(ChoreEditorRoute()) },
+                    onOpenChore = { navController.navigate(ChoreDetailRoute(it)) },
+                    onOpenHistory = { navController.navigate(ChoreHistoryRoute) },
+                )
+            }
             composable<HabitsRoute> { HabitsScreen() }
             composable<HouseholdRoute> {
                 HouseholdScreen(
@@ -89,6 +106,11 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
             composable<HouseholdSetupRoute> { HouseholdSetupScreen(onClose = navController::popBackStack) }
             composable<MemberDetailRoute> { MemberDetailScreen(onBack = navController::popBackStack) }
             composable<HouseholdSettingsRoute> { HouseholdSettingsScreen(onBack = navController::popBackStack) }
+            composable<ChoreDetailRoute> {
+                ChoreDetailScreen(onBack = navController::popBackStack, onEdit = { navController.navigate(ChoreEditorRoute(it)) })
+            }
+            composable<ChoreEditorRoute> { ChoreEditorScreen(onClose = navController::popBackStack) }
+            composable<ChoreHistoryRoute> { HistoryScreen(onBack = navController::popBackStack) }
         }
     }
 }

@@ -21,6 +21,8 @@ fun TopLevelScaffold(
     title: String,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState? = null,
+    floatingActionButton: @Composable () -> Unit = {},
+    actions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -29,10 +31,12 @@ fun TopLevelScaffold(
         topBar = {
             TopAppBar(
                 title = { Text(title, modifier = Modifier.semantics { heading() }) },
+                actions = actions,
                 scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { snackbarHostState?.let { SnackbarHost(it) } },
+        floatingActionButton = floatingActionButton,
         content = content,
     )
 }

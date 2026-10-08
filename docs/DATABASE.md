@@ -45,6 +45,17 @@
 | `prepare_account_deletion()` | Used by the `delete-account` function. It deletes households where you're the only member, and refuses if you own a shared household. |
 | `has_household_permission(id, perm)` | Reports only the caller's own permissions. |
 
+## Phase 2 schema: chores
+
+| Table | Purpose | Access |
+|---|---|---|
+| `chores` | Name, category, `estimated_minutes`, difficulty, points, default `assignee_id`, checklist, notes, `active`, and soft-delete `deleted_at`. Schedule columns: `recurrence_type` (ONCE, DAILY, WEEKLY, MONTHLY_DAY, MONTHLY_WEEKDAY or YEARLY), `recurrence_interval`, `recurrence_weekdays` (ISO 1–7), `recurrence_month_day`, `recurrence_month`, `recurrence_week_ordinal` (1–4, or -1 for last), `recurrence_weekday`, `start_date`/`end_date`, and `times_of_day` (empty means all day). Dates and times are in the household's timezone. A check constraint requires the fields each type needs. | Read: members. Insert: `CREATE_CHORES`. Update: one of EDIT, ASSIGN or DELETE. The trigger `guard_chore_write` then requires `ASSIGN_CHORES` to change the assignee, `DELETE_CHORES` to set `deleted_at`, and `EDIT_CHORES` for anything else. It also locks `household_id` and `created_by`. No hard deletes. |
+| `chore_occurrences` | One row per occurrence that something happened to, identified by `(chore_id, occurrence_date, occurrence_time)` (unique, nulls not distinct). Holds status (PENDING, COMPLETED or SKIPPED), a per-occurrence `assignee_id` override, `completed_by`/`completed_at`, `snoozed_until` and a note. | Members read and upsert. The trigger `guard_occurrence_write` copies `household_id` from the chore, refuses deleted chores and lets a CHILD act only on occurrences assigned to them. Reassigning needs `ASSIGN_CHORES`. `completed_by` is forced to the caller unless they have `EDIT_CHORES`, completion times can't be in the future, and leaving COMPLETED clears the completion fields. No deletes: undo resets the status to PENDING. |
+
+Occurrences are never generated ahead of time. Clients expand the schedule rules (`domain/schedule/ScheduleCalculator`) and merge in stored rows (`OccurrenceResolver`). A pending occurrence that is past due counts as **overdue** until the chore's next occurrence becomes current, then as **missed**. "Current" means the next occurrence's day has started, or, for another slot on the same day, its time has passed.
+
+When a member leaves a household, `unassign_departed_member` clears their default assignments there and their pending per-occurrence overrides. Guards skip writes made by other triggers or by foreign-key actions (`pg_trigger_depth() > 1`), so cascades like this can't be blocked by the leaving member's own permissions.
+
 ### Deletion and cascades
 - Deleting an auth user cascades to their profile, and from there to their memberships.
 - The trigger `guard_owner_removal` blocks removing an OWNER membership while other members remain, so a household can never be left without an owner.

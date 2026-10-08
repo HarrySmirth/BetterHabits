@@ -5,6 +5,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import app.betterhabits.BuildConfig
 import app.betterhabits.data.auth.AuthRepository
 import app.betterhabits.data.auth.SupabaseAuthRepository
+import app.betterhabits.data.chore.ChoreRepository
+import app.betterhabits.data.chore.SupabaseChoreRepository
 import app.betterhabits.data.household.HouseholdRepository
 import app.betterhabits.data.household.HouseholdSession
 import app.betterhabits.data.household.SupabaseHouseholdRepository
@@ -28,6 +30,7 @@ interface AppContainer {
     val householdRepository: HouseholdRepository
     val profileRepository: ProfileRepository
     val householdSession: HouseholdSession
+    val choreRepository: ChoreRepository
 }
 
 private val Context.userPreferencesDataStore by preferencesDataStore(name = "user_preferences")
@@ -51,6 +54,8 @@ class DefaultAppContainer(context: Context) : AppContainer {
     override val householdRepository: HouseholdRepository by lazy { SupabaseHouseholdRepository(supabase) }
 
     override val profileRepository: ProfileRepository by lazy { SupabaseProfileRepository(supabase) }
+
+    override val choreRepository: ChoreRepository by lazy { SupabaseChoreRepository(supabase) }
 
     override val householdSession: HouseholdSession by lazy {
         HouseholdSession(authRepository, householdRepository, profileRepository, userPreferencesRepository, applicationScope)

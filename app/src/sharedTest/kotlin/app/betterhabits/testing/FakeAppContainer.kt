@@ -29,6 +29,9 @@ class FakeAppContainer(scope: CoroutineScope) : AppContainer {
         (authRepository.authState.value as? AuthState.SignedIn)?.user?.id
     }
     override val profileRepository = FakeProfileRepository { householdRepository.names }
+    override val choreRepository = FakeChoreRepository {
+        (authRepository.authState.value as? AuthState.SignedIn)?.user?.id
+    }
     override val householdSession = HouseholdSession(
         authRepository,
         householdRepository,

@@ -27,6 +27,10 @@ import kotlin.reflect.KClass
 @Serializable data object HouseholdSetupRoute
 @Serializable data class MemberDetailRoute(val householdId: String, val userId: String)
 @Serializable data class HouseholdSettingsRoute(val householdId: String)
+@Serializable data class ChoreDetailRoute(val choreId: String)
+/** choreId null = create a new chore. */
+@Serializable data class ChoreEditorRoute(val choreId: String? = null)
+@Serializable data object ChoreHistoryRoute
 
 enum class TopLevelDestination(
     val route: Any,
