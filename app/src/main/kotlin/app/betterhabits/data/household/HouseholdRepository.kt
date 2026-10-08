@@ -35,6 +35,9 @@ interface HouseholdRepository {
 
     suspend fun inviteByEmail(householdId: String, email: String, role: HouseholdRole): Result<Invitation>
 
+    /** Emails the invitee (send-invitation Edge Function). The invitation exists either way. */
+    suspend fun sendInvitationEmail(invitationId: String): Result<Unit>
+
     suspend fun revokeInvitation(invitationId: String): Result<Unit>
 
     suspend fun myPendingInvitations(): Result<List<PendingInvitation>>

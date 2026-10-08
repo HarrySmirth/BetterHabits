@@ -83,6 +83,7 @@
     <string name="error_children_not_allowed">Child accounts can\'t do that.</string>
     <string name="error_transfer_ownership">Transfer ownership to another member first.</string>
     <string name="error_transfer_ownership_named">Transfer ownership of %1$s to another member first.</string>
+    <string name="error_invite_email_not_sent">Invitation created, but the email couldn\'t be sent. Let them know to sign in with that address.</string>
     <string name="error_google_cancelled">Google sign-in was cancelled.</string>
     <string name="error_google_unavailable">Google sign-in isn\'t available on this device right now.</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
@@ -145,7 +146,7 @@
     <string name="revoke_code_body">Nobody will be able to join with it any more. People who already joined stay members.</string>
     <string name="invitation_pending_detail">%1$s · expires %2$s</string>
     <string name="invite_email_title">Invite by email</string>
-    <string name="invite_email_body">They\'ll see the invitation when they sign in to BetterHabits with this email address. No email is sent, so let them know.</string>
+    <string name="invite_email_body">We\'ll email them an invitation. They accept it by signing in to BetterHabits with this address.</string>
     <string name="action_send_invite">Invite</string>
     <string name="add_child_title">Add a child</string>
     <string name="add_child_body">Children get their own sign-in without an email address. You choose their PIN.</string>

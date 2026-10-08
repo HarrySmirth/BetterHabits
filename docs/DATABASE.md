@@ -59,7 +59,8 @@
 npx supabase login                                  # once, opens a browser
 npx supabase link --project-ref <your-project-ref>
 npx supabase db push                                # applies pending migrations
-npx supabase functions deploy child-accounts delete-account
+npx supabase functions deploy child-accounts delete-account send-invitation
+npx supabase secrets set RESEND_API_KEY=re_...         # send-invitation emails (Resend API key, never committed)
 npx supabase config push                            # auth settings + email templates from config.toml
 ```
 `config push` shows a diff and asks per service. Check the diff first. SMTP and Google provider credentials are set in the dashboard and are deliberately not declared in `config.toml`, so the CLI leaves them unchanged. Keep `otp_length = 6`, because the app expects 6-digit codes.

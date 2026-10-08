@@ -155,6 +155,11 @@ class SupabaseHouseholdRepository(private val client: SupabaseClient?) : Househo
         ).decodeAs<InvitationDto>().toDomain() ?: throw AppException(AppError.Unknown())
     }
 
+    override suspend fun sendInvitationEmail(invitationId: String) = backendCall {
+        db().functions.invoke("send-invitation", buildJsonObject { put("invitation_id", invitationId) })
+        Unit
+    }
+
     override suspend fun revokeInvitation(invitationId: String) = backendCall {
         rpc("revoke_invitation", buildJsonObject { put("p_invitation_id", invitationId) })
         Unit

@@ -141,6 +141,15 @@ class FakeHouseholdRepository(private val currentUserId: () -> String?) : Househ
         invitation
     }
 
+    val emailsSent = mutableListOf<String>()
+    var failEmail = false
+
+    override suspend fun sendInvitationEmail(invitationId: String) = call {
+        if (failEmail) throw AppException(AppError.InviteEmailNotSent)
+        emailsSent += invitationId
+        Unit
+    }
+
     override suspend fun revokeInvitation(invitationId: String) = call {
         invitations.remove(invitationId)
         Unit

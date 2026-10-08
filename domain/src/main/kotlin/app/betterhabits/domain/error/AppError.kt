@@ -19,6 +19,8 @@ sealed interface AppError {
     data object AlreadyMember : AppError
     data object ChildrenNotAllowed : AppError
     data class TransferOwnershipRequired(val households: String?) : AppError
+    /** The invitation was created but its notification email could not be sent. */
+    data object InviteEmailNotSent : AppError
     data object GoogleSignInCancelled : AppError
     data object GoogleSignInUnavailable : AppError
     data class Unknown(val cause: Throwable? = null) : AppError

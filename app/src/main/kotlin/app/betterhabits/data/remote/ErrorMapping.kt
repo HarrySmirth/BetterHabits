@@ -41,6 +41,8 @@ private val messageKeys: List<Pair<String, (String) -> AppError>> = listOf(
     "children_cannot_own_households" to { _ -> AppError.ChildrenNotAllowed },
     "permission_denied" to { _ -> AppError.PermissionDenied },
     "invalid_pin" to { _ -> AppError.WeakPassword },
+    "email_not_configured" to { _ -> AppError.InviteEmailNotSent },
+    "email_send_failed" to { _ -> AppError.InviteEmailNotSent },
 )
 
 fun Throwable.toAppError(): AppError = when (this) {

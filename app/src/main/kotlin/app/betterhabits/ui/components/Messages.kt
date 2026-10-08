@@ -26,6 +26,7 @@ fun AppError.messageRes(): Int = when (this) {
     AppError.AlreadyMember -> R.string.error_already_member
     AppError.ChildrenNotAllowed -> R.string.error_children_not_allowed
     is AppError.TransferOwnershipRequired -> R.string.error_transfer_ownership
+    AppError.InviteEmailNotSent -> R.string.error_invite_email_not_sent
     AppError.GoogleSignInCancelled -> R.string.error_google_cancelled
     AppError.GoogleSignInUnavailable -> R.string.error_google_unavailable
     is AppError.Unknown -> R.string.error_unknown

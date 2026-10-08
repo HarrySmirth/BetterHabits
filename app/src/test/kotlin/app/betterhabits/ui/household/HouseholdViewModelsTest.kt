@@ -107,6 +107,21 @@ class HouseholdViewModelsTest {
         vm.sendEmailInvite()
         assertEquals(HouseholdDialog.None, vm.state.value.dialog)
         assertEquals("sarah@example.com", vm.state.value.invitations.single().email)
+        assertEquals(listOf(vm.state.value.invitations.single().id), repo.emailsSent)
+        assertEquals(null, vm.state.value.message)
+    }
+
+    @Test
+    fun `invitation is kept when its email can't be sent`() = runTest {
+        repo.seedHousehold("Home", "harry")
+        repo.failEmail = true
+        val vm = HouseholdViewModel(repo, session(mainDispatcherRule.appScope))
+
+        vm.showInviteByEmail()
+        vm.onInviteEmailChange("sarah@example.com")
+        vm.sendEmailInvite()
+        assertEquals(1, vm.state.value.invitations.size)
+        assertEquals(AppError.InviteEmailNotSent, vm.state.value.message)
     }
 
     @Test

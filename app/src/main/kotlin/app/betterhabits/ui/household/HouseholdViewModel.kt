@@ -180,10 +180,13 @@ class HouseholdViewModel(
         viewModelScope.launch {
             repository.inviteByEmail(id, dialog.email, dialog.role)
                 .onSuccess { invitation ->
+                    // The invitation exists now; the email is a best-effort notification.
+                    val emailError = repository.sendInvitationEmail(invitation.id).exceptionOrNull()?.appError
                     _state.update { s ->
                         s.copy(
                             dialog = HouseholdDialog.None,
                             invitations = listOf(invitation) + s.invitations.filterNot { it.id == invitation.id },
+                            message = emailError?.let { AppError.InviteEmailNotSent },
                         )
                     }
                 }
