@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import app.betterhabits.BuildConfig
+import app.betterhabits.data.allocation.AllocationPlanner
+import app.betterhabits.data.allocation.AllocationRepository
+import app.betterhabits.data.allocation.SupabaseAllocationRepository
 import app.betterhabits.data.auth.AuthRepository
 import app.betterhabits.data.auth.AuthState
 import app.betterhabits.data.auth.DataStoreLastUserStore
@@ -56,6 +59,9 @@ interface AppContainer {
     val householdSession: HouseholdSession
     val choreRepository: ChoreRepository
     val syncController: SyncController
+
+    val allocationRepository: AllocationRepository
+    val allocationPlanner: AllocationPlanner
 
     /** Background worker entry point; null where there is no real sync (tests). */
     val syncEngine: SyncEngine?
@@ -117,6 +123,10 @@ class DefaultAppContainer(context: Context) : AppContainer {
             requestSync = syncEngine::requestSync,
         )
     }
+
+    override val allocationRepository: AllocationRepository by lazy { SupabaseAllocationRepository(supabase, database.cacheDao()) }
+
+    override val allocationPlanner: AllocationPlanner by lazy { AllocationPlanner(choreRepository, allocationRepository) }
 
     private val realtime by lazy {
         RealtimeSync(supabase, applicationScope) { householdId -> syncEngine.sync(householdId) }

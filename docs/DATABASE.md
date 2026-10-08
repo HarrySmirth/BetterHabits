@@ -60,6 +60,12 @@ When a member leaves a household, `unassign_departed_member` clears their defaul
 - `chores` and `chore_occurrences` are in the `supabase_realtime` publication. Realtime applies RLS, so members only hear about their own households.
 - The trigger `chore_occurrences_keep_first_completion` keeps the original `completed_by` and `completed_at` when an already-completed occurrence is completed again, for example by two offline phones.
 
+### Phase 4: allocation
+- `household_members.workload_share` (0.10 to 3.00, default 1) is each member's expected share of the work. It is changed through the RPC `set_member_workload_share`, which needs `CONFIGURE_ALLOCATION`.
+- `household_allocation_settings` holds one row per household: `preference_weight` (0 to 100) and `allow_avoidance`.
+- `member_preferences` stores one level per member and target, where the target is a chore or a category. `member_availability` stores unavailable weekdays and preferred times of day. `member_away_periods` stores date ranges. Members edit their own rows, and a parent with `MANAGE_CHILDREN` can edit a child's rows (`private.can_edit_member_data`). Everyone in the household can read them, because the allocator runs on each phone.
+- `chores` gains `assignment_source` (MANUAL or AUTO), `assignment_locked`, `excluded_member_ids` and `rotate`. `guard_chore_write` requires `ASSIGN_CHORES` to change any of them.
+
 ### Deletion and cascades
 - Deleting an auth user cascades to their profile, and from there to their memberships.
 - The trigger `guard_owner_removal` blocks removing an OWNER membership while other members remain, so a household can never be left without an owner.

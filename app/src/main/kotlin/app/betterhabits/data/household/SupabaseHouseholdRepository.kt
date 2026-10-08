@@ -53,7 +53,7 @@ class SupabaseHouseholdRepository(private val client: SupabaseClient?) : Househo
             }
             val members = async {
                 db().from("household_members")
-                    .select(Columns.raw("user_id, role, joined_at, profiles(display_name, is_child)")) {
+                    .select(Columns.raw("user_id, role, joined_at, workload_share, profiles(display_name, is_child)")) {
                         filter { eq("household_id", householdId) }
                     }
                     .decodeList<MemberDto>()
@@ -70,7 +70,7 @@ class SupabaseHouseholdRepository(private val client: SupabaseClient?) : Househo
                 household = household.await().toDomain(),
                 members = members.await().mapNotNull { dto ->
                     dto.role.toRole()?.let { role ->
-                        HouseholdMember(dto.userId, dto.profiles.displayName, role, dto.profiles.isChild, parseTimestamp(dto.joinedAt))
+                        HouseholdMember(dto.userId, dto.profiles.displayName, role, dto.profiles.isChild, parseTimestamp(dto.joinedAt), dto.workloadShare)
                     }
                 }.sortedWith(compareBy({ it.role.ordinal }, { it.displayName.lowercase() })),
                 rolePermissions = rolePermissions.await()

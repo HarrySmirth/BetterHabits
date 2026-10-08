@@ -2,6 +2,7 @@ package app.betterhabits.ui.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.betterhabits.data.allocation.AllocationPlanner
 import app.betterhabits.data.chore.ChoreRepository
 import app.betterhabits.data.household.HouseholdRepository
 import app.betterhabits.data.household.HouseholdSession
@@ -74,6 +75,7 @@ class TodayViewModel(
     private val households: HouseholdRepository,
     session: HouseholdSession,
     private val sync: SyncController,
+    private val planner: AllocationPlanner,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
 
@@ -131,9 +133,16 @@ class TodayViewModel(
         } else {
             val now = clock.instant()
             act(undo = UndoableAction(occurrence, occurrence.record, completed = true)) {
-                chores.complete(it, occurrence.chore.id, occurrence.key, now)
+                chores.complete(it, occurrence.chore.id, occurrence.key, now).onSuccess { rotateIfNeeded(occurrence) }
             }
         }
+    }
+
+    /** "Take turns" chores move to the next person once done (if this user may assign chores). */
+    private suspend fun rotateIfNeeded(occurrence: ChoreOccurrence) {
+        val context = _state.value.context ?: return
+        if (!occurrence.chore.rotate || !context.details.iCan(HouseholdPermission.ASSIGN_CHORES)) return
+        planner.rotateAfterCompletion(context.details, context.zone, occurrence.chore.id)
     }
 
     /** Back to pending, e.g. "Undo" on a skipped occurrence. */

@@ -19,6 +19,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.betterhabits.ui.allocation.AllocationReviewScreen
+import app.betterhabits.ui.allocation.BalanceScreen
+import app.betterhabits.ui.allocation.PreferencesScreen
 import app.betterhabits.ui.chores.ChoreDetailScreen
 import app.betterhabits.ui.chores.ChoreEditorScreen
 import app.betterhabits.ui.chores.ChoresScreen
@@ -28,6 +31,9 @@ import app.betterhabits.ui.household.HouseholdScreen
 import app.betterhabits.ui.household.HouseholdSettingsScreen
 import app.betterhabits.ui.household.HouseholdSetupScreen
 import app.betterhabits.ui.household.MemberDetailScreen
+import app.betterhabits.ui.navigation.AllocationReviewRoute
+import app.betterhabits.ui.navigation.BalanceRoute
+import app.betterhabits.ui.navigation.PreferencesRoute
 import app.betterhabits.ui.navigation.ChoreDetailRoute
 import app.betterhabits.ui.navigation.ChoreEditorRoute
 import app.betterhabits.ui.navigation.ChoreHistoryRoute
@@ -92,6 +98,7 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
                     onAddChore = { navController.navigate(ChoreEditorRoute()) },
                     onOpenChore = { navController.navigate(ChoreDetailRoute(it)) },
                     onOpenHistory = { navController.navigate(ChoreHistoryRoute) },
+                    onSuggestAssignments = { navController.navigate(AllocationReviewRoute) },
                 )
             }
             composable<HabitsRoute> { HabitsScreen() }
@@ -100,17 +107,25 @@ fun BetterHabitsApp(navController: NavHostController = rememberNavController()) 
                     onOpenMember = { householdId, userId -> navController.navigate(MemberDetailRoute(householdId, userId)) },
                     onOpenSettings = { navController.navigate(HouseholdSettingsRoute(it)) },
                     onAddHousehold = { navController.navigate(HouseholdSetupRoute) },
+                    onOpenBalance = { navController.navigate(BalanceRoute) },
                 )
             }
-            composable<ProfileRoute> { ProfileScreen() }
+            composable<ProfileRoute> { ProfileScreen(onOpenPreferences = { navController.navigate(PreferencesRoute()) }) }
             composable<HouseholdSetupRoute> { HouseholdSetupScreen(onClose = navController::popBackStack) }
-            composable<MemberDetailRoute> { MemberDetailScreen(onBack = navController::popBackStack) }
+            composable<MemberDetailRoute> {
+                MemberDetailScreen(onBack = navController::popBackStack, onOpenPreferences = { navController.navigate(PreferencesRoute(it)) })
+            }
             composable<HouseholdSettingsRoute> { HouseholdSettingsScreen(onBack = navController::popBackStack) }
             composable<ChoreDetailRoute> {
                 ChoreDetailScreen(onBack = navController::popBackStack, onEdit = { navController.navigate(ChoreEditorRoute(it)) })
             }
             composable<ChoreEditorRoute> { ChoreEditorScreen(onClose = navController::popBackStack) }
             composable<ChoreHistoryRoute> { HistoryScreen(onBack = navController::popBackStack) }
+            composable<PreferencesRoute> { PreferencesScreen(onBack = navController::popBackStack) }
+            composable<BalanceRoute> {
+                BalanceScreen(onBack = navController::popBackStack, onSuggest = { navController.navigate(AllocationReviewRoute) })
+            }
+            composable<AllocationReviewRoute> { AllocationReviewScreen(onClose = navController::popBackStack) }
         }
     }
 }

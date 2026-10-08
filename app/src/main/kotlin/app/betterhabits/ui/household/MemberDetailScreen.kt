@@ -62,7 +62,11 @@ import app.betterhabits.ui.components.messageRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MemberDetailScreen(onBack: () -> Unit, viewModel: MemberDetailViewModel = viewModel(factory = AppViewModelFactory.Factory)) {
+fun MemberDetailScreen(
+    onBack: () -> Unit,
+    onOpenPreferences: (memberId: String) -> Unit,
+    viewModel: MemberDetailViewModel = viewModel(factory = AppViewModelFactory.Factory),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val messageText = state.message?.let { stringResource(it.messageRes()) }
@@ -108,6 +112,11 @@ fun MemberDetailScreen(onBack: () -> Unit, viewModel: MemberDetailViewModel = vi
                         )
                     },
                 )
+
+                OutlinedButton(
+                    onClick = { onOpenPreferences(member.userId) },
+                    modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+                ) { Text(stringResource(R.string.member_preferences)) }
 
                 if (state.assignableRoles.size > 1) {
                     HorizontalDivider()

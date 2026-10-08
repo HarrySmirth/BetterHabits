@@ -81,7 +81,7 @@ private data class CachedSummary(val household: CachedHousehold, val role: Strin
 }
 
 @Serializable
-private data class CachedMember(val userId: String, val name: String, val role: String, val isChild: Boolean, val joinedAt: Long)
+private data class CachedMember(val userId: String, val name: String, val role: String, val isChild: Boolean, val joinedAt: Long, val share: Double = 1.0)
 
 @Serializable
 private data class CachedOverride(val userId: String, val permission: String, val granted: Boolean)
@@ -96,7 +96,7 @@ private data class CachedDetails(
     fun toDomain(currentUserId: String) = HouseholdDetails(
         household = household.toDomain(),
         members = members.mapNotNull { m ->
-            m.role.toRole()?.let { HouseholdMember(m.userId, m.name, it, m.isChild, Instant.ofEpochMilli(m.joinedAt)) }
+            m.role.toRole()?.let { HouseholdMember(m.userId, m.name, it, m.isChild, Instant.ofEpochMilli(m.joinedAt), m.share) }
         },
         rolePermissions = rolePermissions.mapNotNull { (role, perms) ->
             role.toRole()?.let { it to perms.mapNotNull(String::toPermission).toSet() }
@@ -108,7 +108,7 @@ private data class CachedDetails(
     companion object {
         fun from(d: HouseholdDetails) = CachedDetails(
             household = CachedHousehold.from(d.household),
-            members = d.members.map { CachedMember(it.userId, it.displayName, it.role.name, it.isChildAccount, it.joinedAt.toEpochMilli()) },
+            members = d.members.map { CachedMember(it.userId, it.displayName, it.role.name, it.isChildAccount, it.joinedAt.toEpochMilli(), it.workloadShare) },
             rolePermissions = d.rolePermissions.map { (role, perms) -> role.name to perms.map { it.name } }.toMap(),
             overrides = d.overrides.map { CachedOverride(it.userId, it.permission.name, it.granted) },
         )

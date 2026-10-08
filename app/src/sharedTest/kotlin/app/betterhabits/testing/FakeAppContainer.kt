@@ -1,5 +1,6 @@
 package app.betterhabits.testing
 
+import app.betterhabits.data.allocation.AllocationPlanner
 import app.betterhabits.data.auth.AuthState
 import app.betterhabits.data.household.HouseholdSession
 import app.betterhabits.data.profile.ProfileRepository
@@ -40,6 +41,8 @@ class FakeAppContainer(scope: CoroutineScope) : AppContainer {
         userPreferencesRepository,
         scope,
     )
+    override val allocationRepository = FakeAllocationRepository()
+    override val allocationPlanner = AllocationPlanner(choreRepository, allocationRepository)
     override val syncController = FakeSyncController()
     override val syncEngine: SyncEngine? = null
 

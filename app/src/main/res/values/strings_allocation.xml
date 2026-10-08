@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Preference levels -->
+    <string name="pref_love">Love it</string>
+    <string name="pref_like">Like it</string>
+    <string name="pref_neutral">Don\'t mind</string>
+    <string name="pref_dislike">Dislike it</string>
+    <string name="pref_hate">Hate it</string>
+    <string name="pref_cannot_do">Can\'t do it</string>
+    <string name="pref_same_as_category">As category (%1$s)</string>
+    <string name="time_morning">Mornings</string>
+    <string name="time_afternoon">Afternoons</string>
+    <string name="time_evening">Evenings</string>
+
+    <!-- Preferences screen -->
+    <string name="prefs_title_mine">My chore preferences</string>
+    <string name="prefs_title_other">%1$s\'s preferences</string>
+    <string name="prefs_entry_body">What you enjoy, what you\'d rather avoid, and when you\'re free</string>
+    <string name="prefs_intro">The app uses these to suggest who does what. Workload stays fair either way, so disliked chores are still shared out. \"Can\'t do it\" is never assigned to you.</string>
+    <string name="prefs_readonly">Only they (or a parent, for children) can change these.</string>
+    <string name="prefs_availability">When you\'re available</string>
+    <string name="prefs_unavailable_days">Days you can\'t do chores</string>
+    <string name="prefs_preferred_times">Times that suit you</string>
+    <string name="prefs_away">Away</string>
+    <string name="prefs_away_range">%1$s – %2$s</string>
+    <string name="prefs_add_away">Add away dates</string>
+    <string name="prefs_categories">Types of chore</string>
+    <string name="member_preferences">Chore preferences</string>
+
+    <!-- Balance -->
+    <string name="balance_title">Workload balance</string>
+    <string name="balance_entry_body">Who\'s doing how much, by estimated time</string>
+    <string name="balance_this_week">This week</string>
+    <string name="balance_four_weeks">Last 4 weeks</string>
+    <string name="balance_good">Well balanced</string>
+    <string name="balance_slightly_uneven">Slightly uneven</string>
+    <string name="balance_uneven">Uneven</string>
+    <string name="balance_nothing">Nothing assigned yet</string>
+    <string name="balance_member_share">%1$s · %2$s</string>
+    <string name="balance_fair_share">Fair share: %1$s</string>
+    <plurals name="balance_estimated">
+        <item quantity="one">%1$s estimated · %2$d chore</item>
+        <item quantity="other">%1$s estimated · %2$d chores</item>
+    </plurals>
+    <string name="balance_completion">%1$s done on time (%2$d of %3$d)</string>
+    <string name="balance_done">Did %1$s of chores in total</string>
+    <plurals name="balance_disliked">
+        <item quantity="one">%1$d chore they\'d rather not do</item>
+        <item quantity="other">%1$d chores they\'d rather not do</item>
+    </plurals>
+    <string name="balance_difficulty">Average difficulty %1$.1f/5</string>
+    <plurals name="balance_points">
+        <item quantity="one">%1$d point</item>
+        <item quantity="other">%1$d points</item>
+    </plurals>
+    <string name="balance_unassigned">%1$s of chores aren\'t assigned to anyone.</string>
+    <string name="balance_disclaimer">These are estimates based on how long each chore is expected to take, not exact measurements.</string>
+    <string name="action_suggest_assignments">Suggest fairer assignments</string>
+
+    <!-- Allocation review -->
+    <string name="review_title">Suggested assignments</string>
+    <string name="review_intro">Based on estimated time, preferences and availability. Nothing changes until you apply it, and you can untick anything you don\'t want.</string>
+    <string name="review_only_unassigned">Only unassigned chores</string>
+    <string name="review_projected">Workload afterwards</string>
+    <string name="review_per_week">%1$s a week</string>
+    <string name="review_changes">Changes</string>
+    <string name="review_change">%1$s → %2$s</string>
+    <string name="review_no_changes_title">Already balanced</string>
+    <string name="review_no_changes_body">The current assignments are as fair as the app can make them.</string>
+    <plurals name="review_apply">
+        <item quantity="one">Apply %1$d change</item>
+        <item quantity="other">Apply %1$d changes</item>
+    </plurals>
+    <plurals name="review_unchanged">
+        <item quantity="one">%1$d chore stays the same</item>
+        <item quantity="other">%1$d chores stay the same</item>
+    </plurals>
+
+    <!-- Reasons -->
+    <string name="reason_locked">Locked to this person</string>
+    <string name="reason_no_one">Nobody can take it (excluded, unable or away)</string>
+    <string name="reason_only_one">%1$s is the only person who can do it</string>
+    <string name="reason_loves">%1$s loves this chore</string>
+    <string name="reason_likes">%1$s prefers this chore</string>
+    <string name="reason_others_prefer_less">%1$s likes it less</string>
+    <string name="reason_less_work">%1$s has %2$s less work a week than %3$s</string>
+    <string name="reason_takes_turn">Taking turns: %1$s did it last time</string>
+    <string name="reason_available">%1$s is free on more of its days than %2$s</string>
+    <string name="reason_suits_time">It\'s at a time of day that suits %1$s</string>
+    <string name="reason_shares_undesirable">Nobody loves this one, so it\'s shared out</string>
+    <string name="reason_balanced">Keeps everyone\'s workload even</string>
+
+    <!-- Editor -->
+    <string name="editor_suggest">Suggest</string>
+    <string name="editor_assignment">Assignment</string>
+    <string name="editor_lock">Always this person</string>
+    <string name="editor_lock_body">Automatic suggestions won\'t change who does it</string>
+    <string name="editor_rotate">Take turns</string>
+    <string name="editor_rotate_body">After each time, it moves to the next person, balanced with workload</string>
+    <string name="editor_never_assign">Never suggest for</string>
+
+    <!-- Household settings -->
+    <string name="settings_allocation">Sharing chores</string>
+    <string name="settings_allocation_readonly">Only people allowed to configure allocation can change these.</string>
+    <string name="settings_preference_weight">How much preferences count</string>
+    <string name="settings_weight_fairness_only">Fairness only: preferences are ignored (except \"can\'t do\")</string>
+    <string name="settings_weight_mostly_fairness">Mostly fairness, preferences break ties</string>
+    <string name="settings_weight_balanced">Balanced: preferences count, workload stays fair</string>
+    <string name="settings_weight_preferences">Preferences count a lot, within a fair range</string>
+    <string name="settings_allow_avoidance">Let people avoid chores they hate</string>
+    <string name="settings_allow_avoidance_body">When off, disliked chores are shared out so nobody escapes them all</string>
+    <string name="settings_fair_shares">Fair share</string>
+    <string name="settings_fair_shares_body">How much each person is expected to do relative to others (1× is standard; 0.5× is half as much)</string>
+    <string name="settings_share_value">%1$.2f×</string>
+</resources>

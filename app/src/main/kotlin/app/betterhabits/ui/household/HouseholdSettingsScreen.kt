@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Slider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -136,6 +137,10 @@ fun HouseholdSettingsScreen(onBack: () -> Unit, viewModel: HouseholdSettingsView
                     }
                 }
 
+                HorizontalDivider(Modifier.padding(top = 16.dp))
+                SectionHeader(stringResource(R.string.settings_allocation))
+                AllocationSettingsSection(state, viewModel)
+
                 if (state.canDelete) {
                     HorizontalDivider(Modifier.padding(top = 16.dp))
                     SectionHeader(stringResource(R.string.settings_danger_zone))
@@ -165,5 +170,63 @@ fun HouseholdSettingsScreen(onBack: () -> Unit, viewModel: HouseholdSettingsView
             onConfirm = viewModel::delete,
             onDismiss = viewModel::cancelDelete,
         )
+    }
+}
+
+/** How chores are shared: preference weight, avoidance, and each person's fair share. */
+@Composable
+private fun AllocationSettingsSection(state: HouseholdSettingsUiState, vm: HouseholdSettingsViewModel) {
+    val editable = state.canConfigureAllocation && !state.busy
+    val weight = state.allocation.preferenceWeight
+    Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (!state.canConfigureAllocation) {
+            Text(stringResource(R.string.settings_allocation_readonly), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text(stringResource(R.string.settings_preference_weight), style = MaterialTheme.typography.bodyLarge)
+        Slider(
+            value = weight.toFloat(),
+            onValueChange = { vm.onPreferenceWeight(it.toInt()) },
+            onValueChangeFinished = vm::saveAllocation,
+            valueRange = 0f..100f,
+            steps = 3,
+            enabled = editable,
+        )
+        Text(
+            stringResource(
+                when {
+                    weight == 0 -> R.string.settings_weight_fairness_only
+                    weight < 50 -> R.string.settings_weight_mostly_fairness
+                    weight < 75 -> R.string.settings_weight_balanced
+                    else -> R.string.settings_weight_preferences
+                },
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.settings_allow_avoidance)) },
+            supportingContent = { Text(stringResource(R.string.settings_allow_avoidance_body)) },
+            trailingContent = { Switch(checked = state.allocation.allowAvoidance, onCheckedChange = null, enabled = editable) },
+            modifier = Modifier.toggleable(
+                value = state.allocation.allowAvoidance,
+                enabled = editable,
+                role = Role.Switch,
+                onValueChange = vm::onAllowAvoidance,
+            ),
+        )
+        Text(stringResource(R.string.settings_fair_shares), style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.settings_fair_shares_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        state.details?.members.orEmpty().forEach { member ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(member.displayName, Modifier.weight(1f))
+                OutlinedButton(onClick = { vm.setShare(member.userId, (member.workloadShare - 0.25).coerceAtLeast(0.25)) }, enabled = editable && member.workloadShare > 0.25) { Text("−") }
+                Text(
+                    stringResource(R.string.settings_share_value, member.workloadShare),
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                OutlinedButton(onClick = { vm.setShare(member.userId, (member.workloadShare + 0.25).coerceAtMost(3.0)) }, enabled = editable && member.workloadShare < 3.0) { Text("+") }
+            }
+        }
     }
 }

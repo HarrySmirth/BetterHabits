@@ -3,11 +3,14 @@ package app.betterhabits.ui.chores
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.betterhabits.data.allocation.AllocationPlanner
 import app.betterhabits.data.chore.ChoreRepository
 import app.betterhabits.data.household.HouseholdRepository
 import app.betterhabits.data.household.HouseholdSession
 import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.appError
+import app.betterhabits.domain.allocation.AllocationProposal
+import app.betterhabits.domain.model.AssignmentSource
 import app.betterhabits.domain.model.Chore
 import app.betterhabits.domain.model.ChoreCategory
 import app.betterhabits.domain.model.Effort
@@ -47,6 +50,10 @@ data class ChoreForm(
     val description: String = "",
     val checklist: List<String> = emptyList(),
     val notes: String = "",
+    val assignmentSource: AssignmentSource = AssignmentSource.MANUAL,
+    val assignmentLocked: Boolean = false,
+    val rotate: Boolean = false,
+    val excludedMemberIds: Set<String> = emptySet(),
 ) {
     val nameValid get() = name.isNotBlank() && name.trim().length <= Chore.MAX_NAME_LENGTH
     val minutesValid get() = minutes != null && minutes in 1..Chore.MAX_MINUTES
@@ -94,6 +101,10 @@ data class ChoreForm(
                 description = chore.description.orEmpty(),
                 checklist = chore.checklist,
                 notes = chore.notes.orEmpty(),
+                assignmentSource = chore.assignmentSource,
+                assignmentLocked = chore.assignmentLocked,
+                rotate = chore.rotate,
+                excludedMemberIds = chore.excludedMemberIds,
             )
         }
     }
@@ -110,10 +121,15 @@ data class ChoreEditorUiState(
     val saving: Boolean = false,
     val saveError: AppError? = null,
     val saved: Boolean = false,
+    /** Why the suggested assignee was picked (shown under the people chips). */
+    val suggestion: AllocationProposal? = null,
+    val suggesting: Boolean = false,
 ) {
     val isNew get() = existing == null
     val canEdit get() = context?.details?.iCan(if (isNew) HouseholdPermission.CREATE_CHORES else HouseholdPermission.EDIT_CHORES) == true
     val canAssign get() = context?.details?.iCan(HouseholdPermission.ASSIGN_CHORES) == true || (isNew && canEdit)
+    /** Locks, rotation and exclusions always need ASSIGN_CHORES (enforced by the server). */
+    val canControlAssignment get() = context?.details?.iCan(HouseholdPermission.ASSIGN_CHORES) == true
 }
 
 class ChoreEditorViewModel(
@@ -121,11 +137,15 @@ class ChoreEditorViewModel(
     private val chores: ChoreRepository,
     private val households: HouseholdRepository,
     private val session: HouseholdSession,
+    private val planner: AllocationPlanner,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
 
     /** Route arg (see ChoreEditorRoute); null when creating. */
     private val choreId: String? = savedStateHandle.get<String>("choreId")
+
+    /** Id for a new chore, stable across "Suggest" and "Save". */
+    private val newChoreId = UUID.randomUUID().toString()
 
     private val _state = MutableStateFlow(ChoreEditorUiState())
     val state: StateFlow<ChoreEditorUiState> = _state.asStateFlow()
@@ -172,7 +192,42 @@ class ChoreEditorViewModel(
     fun onAddTime(time: LocalTime) = edit { it.copy(times = (it.times + time).distinct().sorted()) }
     fun onRemoveTime(time: LocalTime) = edit { it.copy(times = it.times - time) }
     fun onMinutes(value: Int?) = edit { it.copy(minutes = value) }
-    fun onAssignee(userId: String?) = edit { it.copy(assigneeId = userId) }
+    /** Picking someone by hand overrides any suggestion. */
+    fun onAssignee(userId: String?) {
+        edit { it.copy(assigneeId = userId, assignmentSource = AssignmentSource.MANUAL) }
+        _state.update { it.copy(suggestion = null) }
+    }
+
+    fun onLocked(locked: Boolean) = edit { it.copy(assignmentLocked = locked) }
+    fun onRotate(rotate: Boolean) = edit { it.copy(rotate = rotate) }
+    fun onToggleExcluded(memberId: String) = edit {
+        it.copy(excludedMemberIds = if (memberId in it.excludedMemberIds) it.excludedMemberIds - memberId else it.excludedMemberIds + memberId)
+    }
+
+    /** Asks the allocator who should do this chore, given everyone's current load and preferences. */
+    fun suggestAssignee() {
+        val s = _state.value
+        val context = s.context ?: return
+        val draft = buildChore(s, context) ?: run {
+            _state.update { it.copy(showValidation = true) }
+            return
+        }
+        _state.update { it.copy(suggesting = true) }
+        viewModelScope.launch {
+            planner.plan(context.details, context.zone, choreIds = setOf(draft.id), draft = draft.copy(assignmentLocked = false))
+                .onSuccess { plan ->
+                    val proposal = plan.result.proposals.firstOrNull { it.choreId == draft.id }
+                    _state.update { st ->
+                        st.copy(
+                            suggesting = false,
+                            suggestion = proposal,
+                            form = st.form.copy(assigneeId = proposal?.assigneeId, assignmentSource = AssignmentSource.AUTO),
+                        )
+                    }
+                }
+                .onFailure { e -> _state.update { it.copy(suggesting = false, saveError = e.appError) } }
+        }
+    }
     fun onCategory(category: ChoreCategory) = edit { it.copy(category = category) }
     fun onDifficulty(value: Int) = edit { it.copy(difficulty = value.coerceIn(1, 5)) }
     fun onPoints(value: Int) = edit { it.copy(points = value.coerceIn(0, 10_000)) }
@@ -182,16 +237,12 @@ class ChoreEditorViewModel(
     fun onRemoveChecklistItem(index: Int) = edit { it.copy(checklist = it.checklist.filterIndexed { i, _ -> i != index }) }
     fun toggleAdvanced() = _state.update { it.copy(showAdvanced = !it.showAdvanced) }
 
-    fun save() {
-        val s = _state.value
-        val context = s.context ?: return
-        if (!s.form.isValid) {
-            _state.update { it.copy(showValidation = true) }
-            return
-        }
+    /** The chore the form describes, or null if it can't be built yet (no duration, or no weekday for a weekly chore). */
+    private fun buildChore(s: ChoreEditorUiState, context: HouseholdContext): Chore? {
         val form = s.form
-        val chore = Chore(
-            id = s.existing?.id ?: UUID.randomUUID().toString(),
+        if (!form.minutesValid || !form.weekdaysValid || !form.endDateValid) return null
+        return Chore(
+            id = s.existing?.id ?: newChoreId,
             householdId = context.householdId,
             name = form.name.trim(),
             description = form.description.trim().ifEmpty { null },
@@ -201,11 +252,25 @@ class ChoreEditorViewModel(
             points = form.points,
             schedule = Schedule(form.recurrence(), form.startDate, form.endDate, form.times, context.zone),
             assigneeId = form.assigneeId,
+            assignmentSource = form.assignmentSource,
+            assignmentLocked = form.assignmentLocked,
+            rotate = form.rotate,
+            excludedMemberIds = form.excludedMemberIds,
             checklist = form.checklist,
             notes = form.notes.trim().ifEmpty { null },
             requiresProof = s.existing?.requiresProof ?: false,
             active = s.existing?.active ?: true,
         )
+    }
+
+    fun save() {
+        val s = _state.value
+        val context = s.context ?: return
+        if (!s.form.isValid) {
+            _state.update { it.copy(showValidation = true) }
+            return
+        }
+        val chore = buildChore(s, context) ?: return
         _state.update { it.copy(saving = true, saveError = null) }
         viewModelScope.launch {
             // Edits send only the fields that changed, so someone else's concurrent edit to other fields survives.

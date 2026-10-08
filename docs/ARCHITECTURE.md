@@ -33,6 +33,8 @@ Room is the source of truth for UI. Local writes go to Room and also into an out
 
 This is a deterministic scoring model in `:domain`, not a black box. Workload (estimated minutes) is the main term; preference, availability, rotation and undesirable-chore balance adjust it. Every decision carries its list of reasons, so the UI can explain it. Manual locks and exclusions are hard constraints.
 
+The winner must sit within a fairness band (the larger of 20 minutes and 15% of the average load), so preferences never outweigh fairness. `data/allocation/AllocationPlanner` gathers the inputs from local data and runs the engine, so suggestions work offline. Proposals are only ever applied after a person reviews them, except for "take turns" chores, which move to the next person on completion.
+
 ## Key decisions log
 
 | Decision | Why |

@@ -21,6 +21,11 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.outlined.AutoFixHigh
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Switch
+import app.betterhabits.ui.allocation.reasonText
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -171,6 +176,13 @@ private fun EditorForm(state: ChoreEditorUiState, vm: ChoreEditorViewModel) {
                         )
                     }
                 }
+                AssistChip(
+                    onClick = vm::suggestAssignee,
+                    enabled = !state.suggesting,
+                    label = { Text(stringResource(R.string.editor_suggest)) },
+                    leadingIcon = { Icon(Icons.Outlined.AutoFixHigh, contentDescription = null) },
+                )
+                SuggestionReasons(state)
             }
         }
 
@@ -372,6 +384,10 @@ private fun AdvancedSection(state: ChoreEditorUiState, vm: ChoreEditorViewModel)
             }
         }
 
+        if (state.canControlAssignment) {
+            Question(R.string.editor_assignment) { AssignmentControls(state, vm) }
+        }
+
         if (form.repeat != RepeatKind.ONCE) {
             Question(R.string.editor_end_date) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -512,4 +528,68 @@ private fun RepeatKind.labelRes(): Int = when (this) {
     RepeatKind.WEEKLY -> R.string.repeat_weekly
     RepeatKind.MONTHLY -> R.string.repeat_monthly
     RepeatKind.YEARLY -> R.string.repeat_yearly
+}
+
+/** Why the allocator suggested this person, in plain sentences. */
+@Composable
+private fun SuggestionReasons(state: ChoreEditorUiState) {
+    val proposal = state.suggestion ?: return
+    val context = state.context ?: return
+    val res = resources()
+    val unassigned = stringResource(R.string.chore_unassigned)
+    val nameOf = { id: String? -> id?.let { context.member(it)?.displayName } ?: unassigned }
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        proposal.reasons.forEach { reason ->
+            Text(
+                "• " + reasonText(res, reason, nameOf(proposal.assigneeId)) { nameOf(it) },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AssignmentControls(state: ChoreEditorUiState, vm: ChoreEditorViewModel) {
+    val form = state.form
+    SwitchRow(
+        title = stringResource(R.string.editor_lock),
+        body = stringResource(R.string.editor_lock_body),
+        checked = form.assignmentLocked,
+        enabled = form.assigneeId != null,
+        onChange = vm::onLocked,
+    )
+    SwitchRow(
+        title = stringResource(R.string.editor_rotate),
+        body = stringResource(R.string.editor_rotate_body),
+        checked = form.rotate,
+        enabled = true,
+        onChange = vm::onRotate,
+    )
+    Text(stringResource(R.string.editor_never_assign), style = MaterialTheme.typography.bodyLarge)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        state.context?.details?.members.orEmpty().forEach { member ->
+            FilterChip(
+                selected = member.userId in form.excludedMemberIds,
+                onClick = { vm.onToggleExcluded(member.userId) },
+                label = { Text(member.displayName) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SwitchRow(title: String, body: String, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onChange),
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
+    }
 }

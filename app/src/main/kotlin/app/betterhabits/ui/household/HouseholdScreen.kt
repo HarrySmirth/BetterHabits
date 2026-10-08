@@ -19,6 +19,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Balance
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -98,6 +99,7 @@ fun HouseholdScreen(
     onOpenMember: (householdId: String, userId: String) -> Unit,
     onOpenSettings: (householdId: String) -> Unit,
     onAddHousehold: () -> Unit,
+    onOpenBalance: () -> Unit,
     viewModel: HouseholdViewModel = viewModel(factory = AppViewModelFactory.Factory),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -165,6 +167,7 @@ fun HouseholdScreen(
                 HouseholdContent(
                     state = state,
                     details = details,
+                    onOpenBalance = onOpenBalance,
                     onOpenMember = { onOpenMember(details.household.id, it.userId) },
                     viewModel = viewModel,
                 )
@@ -224,10 +227,20 @@ private fun HouseholdSwitcher(
 private fun HouseholdContent(
     state: HouseholdUiState,
     details: HouseholdDetails,
+    onOpenBalance: () -> Unit,
     onOpenMember: (HouseholdMember) -> Unit,
     viewModel: HouseholdViewModel,
 ) {
     LazyColumn(Modifier.fillMaxSize()) {
+        item {
+            ListItem(
+                leadingContent = { Icon(Icons.Outlined.Balance, contentDescription = null) },
+                headlineContent = { Text(stringResource(R.string.balance_title)) },
+                supportingContent = { Text(stringResource(R.string.balance_entry_body)) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onOpenBalance),
+            )
+        }
         item { SectionHeader(stringResource(R.string.household_members, details.members.size)) }
         items(details.members, key = { it.userId }) { member ->
             MemberRow(details, member, onClick = { onOpenMember(member) })

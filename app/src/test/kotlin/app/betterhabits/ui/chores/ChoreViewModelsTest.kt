@@ -12,6 +12,8 @@ import app.betterhabits.domain.model.OccurrenceStatus
 import app.betterhabits.domain.schedule.OccurrenceKey
 import app.betterhabits.domain.schedule.Recurrence
 import app.betterhabits.domain.schedule.Schedule
+import app.betterhabits.data.allocation.AllocationPlanner
+import app.betterhabits.testing.FakeAllocationRepository
 import app.betterhabits.testing.FakeAuthRepository
 import app.betterhabits.testing.FakeChoreRepository
 import app.betterhabits.testing.FakeHouseholdRepository
@@ -66,8 +68,10 @@ class ChoreViewModelsTest {
             .also { chores.putChore(it) }
 
     private val sync = FakeSyncController()
+    private val allocation = FakeAllocationRepository()
+    private val planner by lazy { AllocationPlanner(chores, allocation, clock) }
 
-    private fun today() = TodayViewModel(chores, households, session, sync, clock)
+    private fun today() = TodayViewModel(chores, households, session, sync, planner, clock)
 
     @Test
     fun `today shows my overdue and due items with progress and effort left`() = runTest {
@@ -194,7 +198,7 @@ class ChoreViewModelsTest {
     @Test
     fun `editor validates, then creates a weekly chore`() = runTest {
         signIn("harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, clock)
         val form = vm.state.value.form
         assertEquals(today, form.startDate)
         assertEquals(setOf(DayOfWeek.THURSDAY), form.weekdays)
@@ -220,7 +224,7 @@ class ChoreViewModelsTest {
     @Test
     fun `editor monthly options are anchored to the start date`() = runTest {
         signIn("harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(), chores, households, session, planner, clock)
         vm.onRepeat(RepeatKind.MONTHLY)
         assertEquals(Recurrence.MonthlyOnDay(8), vm.state.value.form.recurrence())
         vm.onMonthlyMode(MonthlyMode.WEEKDAY)
@@ -233,7 +237,7 @@ class ChoreViewModelsTest {
     fun `editor loads an existing chore and saves edits in place`() = runTest {
         chore("dishes", Recurrence.Daily(interval = 2), "harry", minutes = 20)
         signIn("harry")
-        val vm = ChoreEditorViewModel(SavedStateHandle(mapOf("choreId" to "dishes")), chores, households, session, clock)
+        val vm = ChoreEditorViewModel(SavedStateHandle(mapOf("choreId" to "dishes")), chores, households, session, planner, clock)
         assertEquals(RepeatKind.DAILY, vm.state.value.form.repeat)
         assertEquals(2, vm.state.value.form.interval)
 

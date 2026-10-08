@@ -31,6 +31,10 @@ import kotlin.reflect.KClass
 /** choreId null = create a new chore. */
 @Serializable data class ChoreEditorRoute(val choreId: String? = null)
 @Serializable data object ChoreHistoryRoute
+/** memberId null = the signed-in user. */
+@Serializable data class PreferencesRoute(val memberId: String? = null)
+@Serializable data object BalanceRoute
+@Serializable data object AllocationReviewRoute
 
 enum class TopLevelDestination(
     val route: Any,

@@ -1,6 +1,7 @@
 package app.betterhabits.data.chore
 
 import app.betterhabits.data.household.parseTimestamp
+import app.betterhabits.domain.model.AssignmentSource
 import app.betterhabits.domain.model.Chore
 import app.betterhabits.domain.model.ChoreCategory
 import app.betterhabits.domain.model.Effort
@@ -42,6 +43,10 @@ data class ChoreDto(
     val notes: String? = null,
     @SerialName("requires_proof") val requiresProof: Boolean = false,
     val active: Boolean = true,
+    @SerialName("assignment_source") val assignmentSource: String = "MANUAL",
+    @SerialName("assignment_locked") val assignmentLocked: Boolean = false,
+    @SerialName("excluded_member_ids") val excludedMemberIds: List<String> = emptyList(),
+    val rotate: Boolean = false,
     @SerialName("created_by") val createdBy: String? = null,
     // Server-maintained; never sent by the client (see ChoreDto.writableJson).
     @SerialName("updated_at") val updatedAt: String? = null,
@@ -71,6 +76,10 @@ data class ChoreDto(
             requiresProof = requiresProof,
             active = active,
             createdBy = createdBy,
+            assignmentSource = AssignmentSource.entries.firstOrNull { it.name == assignmentSource } ?: AssignmentSource.MANUAL,
+            assignmentLocked = assignmentLocked,
+            excludedMemberIds = excludedMemberIds.toSet(),
+            rotate = rotate,
         )
     }
 
@@ -125,6 +134,10 @@ data class ChoreDto(
                 requiresProof = chore.requiresProof,
                 active = chore.active,
                 createdBy = null,
+                assignmentSource = chore.assignmentSource.name,
+                assignmentLocked = chore.assignmentLocked,
+                excludedMemberIds = chore.excludedMemberIds.sorted(),
+                rotate = chore.rotate,
             )
         }
     }

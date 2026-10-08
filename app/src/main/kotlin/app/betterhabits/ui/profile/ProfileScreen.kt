@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -50,7 +51,10 @@ import app.betterhabits.ui.components.messageRes
 import app.betterhabits.ui.theme.supportsDynamicColor
 
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel = viewModel(factory = AppViewModelFactory.Factory)) {
+fun ProfileScreen(
+    onOpenPreferences: () -> Unit,
+    viewModel: ProfileViewModel = viewModel(factory = AppViewModelFactory.Factory),
+) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val account by viewModel.account.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -89,6 +93,12 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel(factory = AppViewModel
                 },
                 trailingContent = { Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.cd_edit_name)) },
                 modifier = Modifier.clickable(onClick = viewModel::editName),
+            )
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.prefs_title_mine)) },
+                supportingContent = { Text(stringResource(R.string.prefs_entry_body)) },
+                leadingContent = { Icon(Icons.Outlined.Tune, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onOpenPreferences),
             )
             ListItem(
                 headlineContent = { Text(stringResource(R.string.action_sign_out)) },

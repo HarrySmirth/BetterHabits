@@ -34,6 +34,7 @@ data class ChoresUiState(
     val message: AppError? = null,
 ) {
     val canCreate get() = context?.details?.iCan(HouseholdPermission.CREATE_CHORES) == true
+    val canAssign get() = context?.details?.iCan(HouseholdPermission.ASSIGN_CHORES) == true
 }
 
 class ChoresViewModel(

@@ -29,6 +29,7 @@ internal data class MemberDto(
     @SerialName("user_id") val userId: String,
     val role: String,
     @SerialName("joined_at") val joinedAt: String,
+    @SerialName("workload_share") val workloadShare: Double = 1.0,
     val profiles: MemberProfileDto,
 )
 

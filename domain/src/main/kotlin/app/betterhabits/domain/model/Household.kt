@@ -36,6 +36,8 @@ data class HouseholdMember(
     val role: HouseholdRole,
     val isChildAccount: Boolean,
     val joinedAt: Instant,
+    /** Relative fair share of chores (1 = standard). */
+    val workloadShare: Double = 1.0,
 )
 
 data class PermissionOverride(

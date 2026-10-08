@@ -3,9 +3,11 @@ package app.betterhabits.ui.household
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.betterhabits.data.allocation.AllocationRepository
 import app.betterhabits.data.household.HouseholdRepository
 import app.betterhabits.data.household.HouseholdSession
 import app.betterhabits.data.household.SessionState
+import app.betterhabits.domain.allocation.AllocationSettings
 import app.betterhabits.domain.error.AppError
 import app.betterhabits.domain.error.appError
 import app.betterhabits.domain.model.HouseholdDetails
@@ -28,7 +30,9 @@ data class HouseholdSettingsUiState(
     val message: AppError? = null,
     val confirmDelete: Boolean = false,
     val closed: Boolean = false,
+    val allocation: AllocationSettings = AllocationSettings(),
 ) {
+    val canConfigureAllocation get() = details?.iCan(HouseholdPermission.CONFIGURE_ALLOCATION) == true
     val canRename get() = details?.iCan(HouseholdPermission.MANAGE_SETTINGS) == true
     val nameChanged get() = details != null && name.trim() != details.household.name && Validation.isValidHouseholdName(name)
     val canDelete get() = details?.me?.role == HouseholdRole.OWNER
@@ -40,6 +44,7 @@ class HouseholdSettingsViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: HouseholdRepository,
     private val session: HouseholdSession,
+    private val allocation: AllocationRepository,
 ) : ViewModel() {
 
     // Route args are stored in SavedStateHandle by property name (see HouseholdSettingsRoute).
@@ -49,6 +54,7 @@ class HouseholdSettingsViewModel(
 
     init {
         load()
+        loadAllocation()
     }
 
     fun load() {
@@ -67,6 +73,36 @@ class HouseholdSettingsViewModel(
                     }
                 }
                 .onFailure { e -> _state.update { it.copy(loading = false, busy = false, loadError = e.appError) } }
+        }
+    }
+
+    private fun loadAllocation() {
+        viewModelScope.launch {
+            allocation.inputs(householdId).onSuccess { inputs -> _state.update { it.copy(allocation = inputs.settings) } }
+        }
+    }
+
+    /** Slider moves update the label at once; the value is saved when the finger lifts ([saveAllocation]). */
+    fun onPreferenceWeight(weight: Int) = _state.update { it.copy(allocation = it.allocation.copy(preferenceWeight = weight.coerceIn(0, 100))) }
+
+    fun onAllowAvoidance(allow: Boolean) {
+        _state.update { it.copy(allocation = it.allocation.copy(allowAvoidance = allow)) }
+        saveAllocation()
+    }
+
+    fun saveAllocation() {
+        val settings = _state.value.allocation
+        viewModelScope.launch {
+            allocation.saveSettings(householdId, settings).onFailure { e -> _state.update { it.copy(message = e.appError) } }
+        }
+    }
+
+    fun setShare(userId: String, share: Double) {
+        _state.update { it.copy(busy = true) }
+        viewModelScope.launch {
+            allocation.setWorkloadShare(householdId, userId, share)
+                .onSuccess { load() }
+                .onFailure { e -> _state.update { it.copy(busy = false, message = e.appError) } }
         }
     }
 
