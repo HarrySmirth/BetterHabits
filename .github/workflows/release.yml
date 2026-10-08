@@ -1,0 +1,104 @@
+name: Release
+
+# Push a tag vX.Y.Z (matching betterhabits.version in gradle.properties) to publish a signed APK.
+on:
+  push:
+    tags: ['v*.*.*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish signed APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check tag matches app version
+        run: |
+          version=$(grep -E '^betterhabits\.version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Tag $TAG does not match betterhabits.version=$version in gradle.properties"
+            exit 1
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG already exists. Bump the version instead of re-using a tag."
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Check signing and config are available
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          missing=0
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD SUPABASE_URL SUPABASE_PUBLISHABLE_KEY; do
+            if [ -z "${!name}" ]; then echo "::error::Missing $name (see docs/RELEASES.md)"; missing=1; fi
+          done
+          exit $missing
+
+      - name: Decode keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/release.jks"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+
+      - name: Tests and lint
+        run: ./gradlew :domain:test testDebugUnitTest lintRelease
+
+      - name: Build signed release APK
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: ./gradlew assembleRelease
+
+      - name: Verify signature and rename
+        run: |
+          apk=app/build/outputs/apk/release/app-release.apk
+          test -f "$apk" || { echo "::error::Signed APK not found (unsigned builds are not published)"; exit 1; }
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$apksigner" verify --print-certs "$apk"
+          mkdir -p dist
+          cp "$apk" "dist/BetterHabits-v$VERSION.apk"
+          (cd dist && sha256sum "BetterHabits-v$VERSION.apk" > "BetterHabits-v$VERSION.apk.sha256")
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$TAG" dist/* \
+            --verify-tag \
+            --title "BetterHabits $TAG" \
+            --generate-notes \
+            --notes "Download **BetterHabits-v$VERSION.apk** below and open it on your Android device (Android 8.0+). See the README for install steps."
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BetterHabits</string>
+
+    <!-- Top-level navigation -->
+    <string name="nav_today">Today</string>
+    <string name="nav_chores">Chores</string>
+    <string name="nav_habits">Habits</string>
+    <string name="nav_household">Household</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Empty states (Phase 0 shell: these screens have no data sources yet) -->
+    <string name="today_empty_title">Nothing scheduled today</string>
+    <string name="today_empty_body">Chores and habits due today will appear here.</string>
+    <string name="chores_empty_title">No chores yet</string>
+    <string name="chores_empty_body">Household chores will be listed here once your household is set up.</string>
+    <string name="habits_empty_title">No habits yet</string>
+    <string name="habits_empty_body">Personal habits you track will appear here.</string>
+    <string name="household_empty_title">No household yet</string>
+    <string name="household_empty_body">Members, templates, workload balance and activity will live here.</string>
+
+    <!-- Profile / appearance -->
+    <string name="profile_appearance">Appearance</string>
+    <string name="profile_theme">Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="profile_dynamic_color">Dynamic colour</string>
+    <string name="profile_dynamic_color_body">Use colours from your wallpaper</string>
+    <string name="profile_dynamic_color_unsupported">Requires Android 12 or newer</string>
+    <string name="profile_version">Version %1$s</string>
+</resources>
