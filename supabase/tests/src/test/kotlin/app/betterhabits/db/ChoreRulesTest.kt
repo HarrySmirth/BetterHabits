@@ -125,6 +125,23 @@ class ChoreRulesTest {
     }
 
     @Test
+    fun `when two people complete the same occurrence the first completion is kept`() {
+        val h = home()
+        val chore = createChore(h.owner, h.id, assignee = h.owner.id)
+        complete(h.owner, chore)
+        val second = complete(h.member, chore)
+        assertEquals(h.owner.id, second["completed_by"])
+    }
+
+    @Test
+    fun `chores and occurrences are published for realtime`() {
+        asAdmin {
+            val tables = query("select tablename from pg_publication_tables where pubname = 'supabase_realtime'").map { it["tablename"] }
+            assertEquals(setOf("chores", "chore_occurrences"), tables.toSet())
+        }
+    }
+
+    @Test
     fun `children can only complete occurrences assigned to them`() {
         val h = home()
         val theirs = createChore(h.owner, h.id, assignee = h.child.id)

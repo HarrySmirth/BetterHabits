@@ -33,7 +33,7 @@ import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.components.EmptyState
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
-import app.betterhabits.ui.components.OnReturn
+import app.betterhabits.ui.components.SyncStatusBanner
 import app.betterhabits.ui.components.SectionHeader
 import app.betterhabits.ui.components.TopLevelScaffold
 import app.betterhabits.ui.components.messageRes
@@ -49,7 +49,6 @@ fun ChoresScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    OnReturn(viewModel::refresh)
     val messageText = state.message?.let { stringResource(it.messageRes()) }
     LaunchedEffect(state.message) {
         if (messageText != null) {
@@ -96,6 +95,7 @@ fun ChoresScreen(
                     .fillMaxSize(),
             ) {
                 LazyColumn(Modifier.fillMaxSize()) {
+                    item { SyncStatusBanner(state.sync, viewModel::dismissSyncProblem, Modifier.padding(bottom = 8.dp)) }
                     items(state.active, key = { it.chore.id }) { ChoreRow(it, state, onOpenChore) }
                     if (state.paused.isNotEmpty()) {
                         item { SectionHeader(stringResource(R.string.chores_paused)) }

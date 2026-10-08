@@ -3,6 +3,7 @@ package app.betterhabits.testing
 import app.betterhabits.data.auth.AuthState
 import app.betterhabits.data.household.HouseholdSession
 import app.betterhabits.data.profile.ProfileRepository
+import app.betterhabits.data.sync.SyncEngine
 import app.betterhabits.di.AppContainer
 import app.betterhabits.domain.model.Profile
 import kotlinx.coroutines.CoroutineScope
@@ -39,4 +40,8 @@ class FakeAppContainer(scope: CoroutineScope) : AppContainer {
         userPreferencesRepository,
         scope,
     )
+    override val syncController = FakeSyncController()
+    override val syncEngine: SyncEngine? = null
+
+    override fun setForeground(foreground: Boolean) = Unit
 }

@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,7 +37,6 @@ import app.betterhabits.ui.AppViewModelFactory
 import app.betterhabits.ui.components.ConfirmDialog
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
-import app.betterhabits.ui.components.OnReturn
 import app.betterhabits.ui.components.SectionHeader
 import app.betterhabits.ui.components.messageRes
 import java.time.LocalDate
@@ -61,7 +59,6 @@ fun ChoreDetailScreen(
         }
     }
     LaunchedEffect(state.closed) { if (state.closed) onBack() }
-    OnReturn(viewModel::load) // e.g. back from the editor
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbar) },
@@ -98,7 +95,6 @@ fun ChoreDetailScreen(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState()),
                 ) {
-                    if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(scheduleText(res, chore.schedule, locale), style = MaterialTheme.typography.titleMedium)
                         Text(
@@ -169,12 +165,12 @@ fun ChoreDetailScreen(
                         HorizontalDivider(Modifier.padding(top = 16.dp))
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (state.canEdit) {
-                                OutlinedButton(onClick = { viewModel.setActive(!chore.active) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+                                OutlinedButton(onClick = { viewModel.setActive(!chore.active) }, modifier = Modifier.fillMaxWidth()) {
                                     Text(stringResource(if (chore.active) R.string.action_pause_chore else R.string.action_resume_chore))
                                 }
                             }
                             if (state.canDelete) {
-                                OutlinedButton(onClick = viewModel::requestDelete, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+                                OutlinedButton(onClick = viewModel::requestDelete, modifier = Modifier.fillMaxWidth()) {
                                     Text(stringResource(R.string.action_delete_chore), color = MaterialTheme.colorScheme.error)
                                 }
                             }

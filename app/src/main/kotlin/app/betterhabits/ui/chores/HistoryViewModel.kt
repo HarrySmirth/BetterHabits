@@ -13,6 +13,7 @@ import app.betterhabits.domain.schedule.OccurrenceResolver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ data class HistoryUiState(
         get() = person?.let { p -> entries.filter { it.assigneeId == p || it.completedBy == p } } ?: entries
 }
 
-/** Completed, skipped and missed chores over the last [DAYS] days. */
+/** Completed, skipped and missed chores over the last [DAYS] days, updating live. */
 class HistoryViewModel(
     private val chores: ChoreRepository,
     private val households: HouseholdRepository,
@@ -48,18 +49,17 @@ class HistoryViewModel(
     fun load() {
         viewModelScope.launch {
             val (householdId, userId) = session.selectedHousehold().first()
-            households.loadContext(householdId, userId).mapCatching { context ->
-                val now = clock.instant()
-                val today = now.atZone(context.zone).toLocalDate()
-                val from = today.minusDays(DAYS)
-                val list = chores.chores(householdId, context.zone).getOrThrow()
-                val records = chores.records(householdId, from, today).getOrThrow()
-                context to OccurrenceResolver.resolve(list, records, from, today, now)
+            val context = households.loadContext(householdId, userId).getOrElse { e ->
+                _state.update { it.copy(loading = false, loadError = e.appError) }
+                return@launch
+            }
+            val today = clock.instant().atZone(context.zone).toLocalDate()
+            val from = today.minusDays(DAYS)
+            combine(chores.observeChores(householdId, context.zone), chores.observeRecords(householdId, from, today)) { list, records ->
+                OccurrenceResolver.resolve(list, records, from, today, clock.instant())
                     .filter { it.state in HISTORY_STATES }
                     .sortedByDescending { it.record?.completedAt ?: it.dueAt }
-            }.onSuccess { (context, entries) ->
-                _state.update { it.copy(loading = false, loadError = null, context = context, entries = entries) }
-            }.onFailure { e -> _state.update { it.copy(loading = false, loadError = e.appError) } }
+            }.collect { entries -> _state.update { it.copy(loading = false, loadError = null, context = context, entries = entries) } }
         }
     }
 

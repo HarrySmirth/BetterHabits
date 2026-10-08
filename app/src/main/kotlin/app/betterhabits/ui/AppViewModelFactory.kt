@@ -51,8 +51,8 @@ object AppViewModelFactory {
         initializer { MemberDetailViewModel(createSavedStateHandle(), container().householdRepository, container().householdSession) }
         initializer { HouseholdSettingsViewModel(createSavedStateHandle(), container().householdRepository, container().householdSession) }
 
-        initializer { val c = container(); TodayViewModel(c.choreRepository, c.householdRepository, c.householdSession) }
-        initializer { val c = container(); ChoresViewModel(c.choreRepository, c.householdRepository, c.householdSession) }
+        initializer { val c = container(); TodayViewModel(c.choreRepository, c.householdRepository, c.householdSession, c.syncController) }
+        initializer { val c = container(); ChoresViewModel(c.choreRepository, c.householdRepository, c.householdSession, c.syncController) }
         initializer { val c = container(); ChoreDetailViewModel(createSavedStateHandle(), c.choreRepository, c.householdRepository, c.householdSession) }
         initializer { val c = container(); ChoreEditorViewModel(createSavedStateHandle(), c.choreRepository, c.householdRepository, c.householdSession) }
         initializer { val c = container(); HistoryViewModel(c.choreRepository, c.householdRepository, c.householdSession) }

@@ -69,14 +69,14 @@ class ChoreFlowTest {
     @Test
     fun completeTodaysChoreAndSeeProgress() {
         val today = LocalDate.now(ZoneId.of("UTC"))
-        fakes.choreRepository.chores["dishes"] = Chore(
+        fakes.choreRepository.putChore(Chore(
             id = "dishes",
             householdId = householdId,
             name = "Empty dishwasher",
             effort = Effort(5),
             schedule = Schedule(Recurrence.Daily(), today, zone = ZoneId.of("UTC")),
             assigneeId = "harry",
-        )
+        ))
         ActivityScenario.launch(MainActivity::class.java)
 
         compose.onNodeWithTextEventually("0 of 1 chore done")

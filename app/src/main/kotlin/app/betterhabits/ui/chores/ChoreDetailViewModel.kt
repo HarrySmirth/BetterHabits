@@ -17,6 +17,7 @@ import app.betterhabits.domain.schedule.OccurrenceResolver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,9 +30,9 @@ data class ChoreDetailUiState(
     val chore: Chore? = null,
     val upcoming: List<ChoreOccurrence> = emptyList(),
     val history: List<OccurrenceRecord> = emptyList(),
-    val busy: Boolean = false,
     val confirmDelete: Boolean = false,
     val message: AppError? = null,
+    /** Deleted (here or on another phone) or never existed: close the screen. */
     val closed: Boolean = false,
 ) {
     val canEdit get() = context?.details?.iCan(HouseholdPermission.EDIT_CHORES) == true
@@ -59,30 +60,28 @@ class ChoreDetailViewModel(
     fun load() {
         viewModelScope.launch {
             val (householdId, userId) = session.selectedHousehold().first()
-            val result = households.loadContext(householdId, userId).mapCatching { context ->
-                val chore = chores.chore(choreId, context.zone).getOrThrow()
-                val now = clock.instant()
-                val today = now.atZone(context.zone).toLocalDate()
-                val records = chores.records(householdId, today, today.plusDays(UPCOMING_WINDOW_DAYS)).getOrThrow()
-                val upcoming = OccurrenceResolver.resolve(listOf(chore), records, today, today.plusDays(UPCOMING_WINDOW_DAYS), now)
-                    .filter { it.state == OccurrenceState.UPCOMING || it.state == OccurrenceState.SNOOZED }
-                    .take(UPCOMING_COUNT)
-                val history = chores.history(householdId, choreId, limit = HISTORY_LIMIT).getOrThrow()
-                Triple(context, chore to upcoming, history)
+            val context = households.loadContext(householdId, userId).getOrElse { e ->
+                _state.update { it.copy(loading = false, loadError = e.appError) }
+                return@launch
             }
-            result.onSuccess { (context, choreAndUpcoming, history) ->
+            val today = clock.instant().atZone(context.zone).toLocalDate()
+            combine(
+                chores.observeChore(choreId, context.zone),
+                chores.observeRecords(householdId, today, today.plusDays(UPCOMING_WINDOW_DAYS)),
+                chores.observeHistory(householdId, choreId, HISTORY_LIMIT),
+            ) { chore, records, history ->
+                val upcoming = chore?.let {
+                    OccurrenceResolver.resolve(listOf(it), records, today, today.plusDays(UPCOMING_WINDOW_DAYS), clock.instant())
+                        .filter { o -> o.state == OccurrenceState.UPCOMING || o.state == OccurrenceState.SNOOZED }
+                        .take(UPCOMING_COUNT)
+                }.orEmpty()
+                Triple(chore, upcoming, history)
+            }.collect { (chore, upcoming, history) ->
                 _state.update {
-                    it.copy(
-                        loading = false,
-                        loadError = null,
-                        busy = false,
-                        context = context,
-                        chore = choreAndUpcoming.first,
-                        upcoming = choreAndUpcoming.second,
-                        history = history,
-                    )
+                    if (chore == null) it.copy(loading = false, closed = true)
+                    else it.copy(loading = false, context = context, chore = chore, upcoming = upcoming, history = history)
                 }
-            }.onFailure { e -> _state.update { it.copy(loading = false, busy = false, loadError = e.appError) } }
+            }
         }
     }
 
@@ -92,20 +91,16 @@ class ChoreDetailViewModel(
 
     fun setActive(active: Boolean) {
         val chore = _state.value.chore ?: return
-        _state.update { it.copy(busy = true) }
         viewModelScope.launch {
-            chores.updateChore(chore.copy(active = active))
-                .onSuccess { load() }
-                .onFailure { e -> _state.update { it.copy(busy = false, message = e.appError) } }
+            chores.updateChore(chore, chore.copy(active = active)).onFailure { e -> _state.update { it.copy(message = e.appError) } }
         }
     }
 
     fun delete() {
-        _state.update { it.copy(busy = true, confirmDelete = false) }
+        val chore = _state.value.chore ?: return
+        _state.update { it.copy(confirmDelete = false) }
         viewModelScope.launch {
-            chores.deleteChore(choreId)
-                .onSuccess { _state.update { it.copy(closed = true) } }
-                .onFailure { e -> _state.update { it.copy(busy = false, message = e.appError) } }
+            chores.deleteChore(chore.householdId, chore.id).onFailure { e -> _state.update { it.copy(message = e.appError) } }
         }
     }
 

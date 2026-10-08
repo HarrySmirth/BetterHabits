@@ -174,4 +174,16 @@
     <string name="field_checklist_item">Add a step</string>
     <string name="action_add_item">Add step</string>
     <string name="field_notes">Notes</string>
+    <!-- Sync -->
+    <string name="action_dismiss">Dismiss</string>
+    <string name="sync_offline">You\'re offline. Changes are saved on this phone and will sync later.</string>
+    <plurals name="sync_offline_pending">
+        <item quantity="one">You\'re offline. %1$d change will sync when you\'re back online.</item>
+        <item quantity="other">You\'re offline. %1$d changes will sync when you\'re back online.</item>
+    </plurals>
+    <plurals name="sync_pending">
+        <item quantity="one">Saving %1$d change…</item>
+        <item quantity="other">Saving %1$d changes…</item>
+    </plurals>
+    <string name="sync_problem">A change couldn\'t be saved and was undone: %1$s</string>
 </resources>

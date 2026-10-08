@@ -151,11 +151,11 @@ class ChoreEditorViewModel(
                     )
                 }
             } else {
-                chores.chore(choreId, context.zone)
-                    .onSuccess { chore ->
-                        _state.update { it.copy(loading = false, context = context, existing = chore, form = ChoreForm.from(chore)) }
-                    }
-                    .onFailure { e -> _state.update { it.copy(loading = false, loadError = e.appError) } }
+                val chore = chores.observeChore(choreId, context.zone).first()
+                _state.update {
+                    if (chore == null) it.copy(loading = false, loadError = AppError.Unknown())
+                    else it.copy(loading = false, context = context, existing = chore, form = ChoreForm.from(chore))
+                }
             }
         }
     }
@@ -208,7 +208,8 @@ class ChoreEditorViewModel(
         )
         _state.update { it.copy(saving = true, saveError = null) }
         viewModelScope.launch {
-            val result = if (s.isNew) chores.createChore(chore) else chores.updateChore(chore)
+            // Edits send only the fields that changed, so someone else's concurrent edit to other fields survives.
+            val result = s.existing?.let { original -> chores.updateChore(original, chore) } ?: chores.createChore(chore)
             result
                 .onSuccess { _state.update { it.copy(saving = false, saved = true) } }
                 .onFailure { e -> _state.update { it.copy(saving = false, saveError = e.appError) } }

@@ -60,7 +60,7 @@ import app.betterhabits.ui.chores.resources
 import app.betterhabits.ui.components.EmptyState
 import app.betterhabits.ui.components.ErrorState
 import app.betterhabits.ui.components.LoadingState
-import app.betterhabits.ui.components.OnReturn
+import app.betterhabits.ui.components.SyncStatusBanner
 import app.betterhabits.ui.components.SectionHeader
 import app.betterhabits.ui.components.TopLevelScaffold
 import app.betterhabits.ui.components.messageRes
@@ -74,7 +74,6 @@ fun TodayScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    OnReturn(viewModel::refresh)
     val res = resources()
 
     val messageText = state.message?.let { stringResource(it.messageRes()) }
@@ -129,6 +128,7 @@ fun TodayScreen(
 @Composable
 private fun TodayContent(state: TodayUiState, viewModel: TodayViewModel, onOpenChore: (String) -> Unit) {
     LazyColumn(Modifier.fillMaxSize()) {
+        item { SyncStatusBanner(state.sync, viewModel::dismissSyncProblem, Modifier.padding(bottom = 8.dp)) }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(horizontal = 16.dp)) {
                 FilterChip(

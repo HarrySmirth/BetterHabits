@@ -16,6 +16,7 @@ import app.betterhabits.testing.FakeAuthRepository
 import app.betterhabits.testing.FakeChoreRepository
 import app.betterhabits.testing.FakeHouseholdRepository
 import app.betterhabits.testing.FakeProfileRepository
+import app.betterhabits.testing.FakeSyncController
 import app.betterhabits.testing.FakeUserPreferencesRepository
 import app.betterhabits.testing.MainDispatcherRule
 import app.betterhabits.ui.today.AgendaFilter
@@ -62,9 +63,11 @@ class ChoreViewModelsTest {
 
     private fun chore(id: String, recurrence: Recurrence, assignee: String?, start: LocalDate = today.minusDays(14), minutes: Int = 10, active: Boolean = true) =
         Chore(id, householdId, id, effort = Effort(minutes), schedule = Schedule(recurrence, start, zone = ZoneOffset.UTC), assigneeId = assignee, active = active)
-            .also { chores.chores[id] = it }
+            .also { chores.putChore(it) }
 
-    private fun today() = TodayViewModel(chores, households, session, clock)
+    private val sync = FakeSyncController()
+
+    private fun today() = TodayViewModel(chores, households, session, sync, clock)
 
     @Test
     fun `today shows my overdue and due items with progress and effort left`() = runTest {
@@ -182,7 +185,7 @@ class ChoreViewModelsTest {
         chore("daily", Recurrence.Daily(), "harry")
         chore("paused", Recurrence.Daily(), null, active = false)
         signIn("harry")
-        val state = ChoresViewModel(chores, households, session, clock).state.value
+        val state = ChoresViewModel(chores, households, session, sync, clock).state.value
         assertEquals(listOf("daily", "monthly"), state.active.map { it.chore.id })
         assertEquals(today, state.active.first().next?.key?.date)
         assertEquals(listOf("paused"), state.paused.map { it.chore.id })
@@ -243,10 +246,10 @@ class ChoreViewModelsTest {
     @Test
     fun `history includes completed, skipped and missed occurrences`() = runTest {
         chore("dishes", Recurrence.Daily(), "harry", start = today.minusDays(3))
-        chores.records["dishes" to OccurrenceKey(today.minusDays(3))] =
-            app.betterhabits.domain.model.OccurrenceRecord("dishes", OccurrenceKey(today.minusDays(3)), OccurrenceStatus.COMPLETED, completedBy = "sarah", completedAt = clock.instant())
-        chores.records["dishes" to OccurrenceKey(today.minusDays(2))] =
-            app.betterhabits.domain.model.OccurrenceRecord("dishes", OccurrenceKey(today.minusDays(2)), OccurrenceStatus.SKIPPED)
+        chores.putRecord(
+            app.betterhabits.domain.model.OccurrenceRecord("dishes", OccurrenceKey(today.minusDays(3)), OccurrenceStatus.COMPLETED, completedBy = "sarah", completedAt = clock.instant()),
+        )
+        chores.putRecord(app.betterhabits.domain.model.OccurrenceRecord("dishes", OccurrenceKey(today.minusDays(2)), OccurrenceStatus.SKIPPED))
         signIn("harry")
 
         val vm = HistoryViewModel(chores, households, session, clock)

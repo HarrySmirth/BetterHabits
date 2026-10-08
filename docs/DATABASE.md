@@ -56,6 +56,10 @@ Occurrences are never generated ahead of time. Clients expand the schedule rules
 
 When a member leaves a household, `unassign_departed_member` clears their default assignments there and their pending per-occurrence overrides. Guards skip writes made by other triggers or by foreign-key actions (`pg_trigger_depth() > 1`), so cascades like this can't be blocked by the leaving member's own permissions.
 
+### Phase 3: sync support
+- `chores` and `chore_occurrences` are in the `supabase_realtime` publication. Realtime applies RLS, so members only hear about their own households.
+- The trigger `chore_occurrences_keep_first_completion` keeps the original `completed_by` and `completed_at` when an already-completed occurrence is completed again, for example by two offline phones.
+
 ### Deletion and cascades
 - Deleting an auth user cascades to their profile, and from there to their memberships.
 - The trigger `guard_owner_removal` blocks removing an OWNER membership while other members remain, so a household can never be left without an owner.

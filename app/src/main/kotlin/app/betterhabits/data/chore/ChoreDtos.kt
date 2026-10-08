@@ -18,7 +18,7 @@ import java.time.ZoneId
 
 /** Row shape of public.chores. Recurrence travels as typed columns, validated by the database. */
 @Serializable
-internal data class ChoreDto(
+data class ChoreDto(
     val id: String,
     @SerialName("household_id") val householdId: String,
     val name: String,
@@ -43,6 +43,9 @@ internal data class ChoreDto(
     @SerialName("requires_proof") val requiresProof: Boolean = false,
     val active: Boolean = true,
     @SerialName("created_by") val createdBy: String? = null,
+    // Server-maintained; never sent by the client (see ChoreDto.writableJson).
+    @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("deleted_at") val deletedAt: String? = null,
 ) {
     fun toDomain(zone: ZoneId): Chore? {
         val recurrence = runCatching { recurrence() }.getOrNull() ?: return null
@@ -128,7 +131,7 @@ internal data class ChoreDto(
 }
 
 @Serializable
-internal data class OccurrenceDto(
+data class OccurrenceDto(
     @SerialName("chore_id") val choreId: String,
     @SerialName("occurrence_date") val occurrenceDate: String,
     @SerialName("occurrence_time") val occurrenceTime: String? = null,
@@ -138,6 +141,7 @@ internal data class OccurrenceDto(
     @SerialName("completed_at") val completedAt: String? = null,
     @SerialName("snoozed_until") val snoozedUntil: String? = null,
     val note: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
 ) {
     fun toDomain(): OccurrenceRecord? {
         val status = OccurrenceStatus.entries.firstOrNull { it.name == status } ?: return null

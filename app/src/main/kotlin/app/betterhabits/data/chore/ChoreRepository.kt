@@ -3,29 +3,39 @@ package app.betterhabits.data.chore
 import app.betterhabits.domain.model.Chore
 import app.betterhabits.domain.model.OccurrenceRecord
 import app.betterhabits.domain.schedule.OccurrenceKey
+import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-/** Chores and occurrence records for a household. Permission rules are enforced server-side. */
+/**
+ * Chores and occurrence records for a household, offline-first.
+ *
+ * Reads are live streams of the local copy: they update when this device changes something, when a
+ * sync pulls changes, or when realtime reports someone else's change. Writes apply locally at once
+ * and are queued for the server; they only fail for local reasons. Server rejections surface through
+ * [app.betterhabits.data.sync.SyncController] and are rolled back.
+ */
 interface ChoreRepository {
-    /** Active and paused chores (not deleted). [zone] is the household timezone the schedules use. */
-    suspend fun chores(householdId: String, zone: ZoneId): Result<List<Chore>>
+    /** Active and paused chores (not deleted). [zone] is the household timezone schedules use. */
+    fun observeChores(householdId: String, zone: ZoneId): Flow<List<Chore>>
 
-    suspend fun chore(choreId: String, zone: ZoneId): Result<Chore>
+    /** Emits null if the chore doesn't exist locally or was deleted. */
+    fun observeChore(choreId: String, zone: ZoneId): Flow<Chore?>
 
     /** Records for occurrences dated [from]..[to] (household-local dates). */
-    suspend fun records(householdId: String, from: LocalDate, to: LocalDate): Result<List<OccurrenceRecord>>
+    fun observeRecords(householdId: String, from: LocalDate, to: LocalDate): Flow<List<OccurrenceRecord>>
 
     /** Completed/skipped records, newest first, optionally for one chore. */
-    suspend fun history(householdId: String, choreId: String? = null, limit: Int = 100): Result<List<OccurrenceRecord>>
+    fun observeHistory(householdId: String, choreId: String? = null, limit: Int = 100): Flow<List<OccurrenceRecord>>
 
     suspend fun createChore(chore: Chore): Result<Unit>
 
-    suspend fun updateChore(chore: Chore): Result<Unit>
+    /** Sends only the fields that differ between [original] (as loaded) and [updated]. */
+    suspend fun updateChore(original: Chore, updated: Chore): Result<Unit>
 
     /** Soft delete: history is kept. */
-    suspend fun deleteChore(choreId: String): Result<Unit>
+    suspend fun deleteChore(householdId: String, choreId: String): Result<Unit>
 
     suspend fun complete(householdId: String, choreId: String, key: OccurrenceKey, completedAt: Instant, completedBy: String? = null): Result<Unit>
 

@@ -14,7 +14,19 @@ import app.betterhabits.ui.theme.isDarkTheme
 
 class MainActivity : ComponentActivity() {
 
+    private val container get() = (application as BetterHabitsApplication).container
+
     private val viewModel: MainViewModel by viewModels { AppViewModelFactory.Factory }
+
+    override fun onStart() {
+        super.onStart()
+        container.setForeground(true)
+    }
+
+    override fun onStop() {
+        container.setForeground(false)
+        super.onStop()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
